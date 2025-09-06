@@ -1,6 +1,7 @@
 package com.Healthcare.service;
 
 import com.Healthcare.dto.DoctorDutyScheduleDto;
+import com.Healthcare.dto.DutyRosterDto;
 import com.Healthcare.dto.DutySlotDto;
 import com.Healthcare.model.BookAppointment;
 import com.Healthcare.model.Doctor;
@@ -23,7 +24,7 @@ public class DutyRosterService {
     private final DutyRosterRepository dutyRosterRepository;
     private final DoctorRepository doctorRepository;
     private final BookAppointmentRepository bookAppointmentRepository;
-    private final EntityManagerFactory entityManagerFactory; // For Hibernate stats
+    private final EntityManagerFactory entityManagerFactory;
 
     public DutyRosterService(DutyRosterRepository dutyRosterRepository,
                              DoctorRepository doctorRepository,
@@ -35,16 +36,36 @@ public class DutyRosterService {
         this.entityManagerFactory = entityManagerFactory;
     }
 
+    // New method to create a DutyRoster from DutyRosterDto
+    public DutyRoster createDutyRoster(DutyRosterDto dto) {
+        DutyRoster dutyRoster = new DutyRoster();
+
+        dutyRoster.setDutyDate(dto.getDutyDate().toString()); // Assuming DutyRosterDto has LocalDate dutyDate
+        dutyRoster.setFromTime(dto.getFromTime());
+        dutyRoster.setToTime(dto.getToTime());
+        dutyRoster.setDuration(dto.getDuration());
+        dutyRoster.setIsAvailable(dto.getIsAvailable() != null ? dto.getIsAvailable() : true);
+
+        // Find doctor by ID and set it
+        Doctor doctor = doctorRepository.findById(dto.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + dto.getDoctorId()));
+        dutyRoster.setDoctor(doctor);
+
+        return dutyRosterRepository.save(dutyRoster);
+    }
+
+    // New method to get all DutyRoster records
+    public List<DutyRoster> getAllRoster() {
+        return dutyRosterRepository.findAll();
+    }
+
     public List<DoctorDutyScheduleDto> getDoctorDutySchedules(Long doctorId, Long specializationId, String dutyDate) {
-        // Fetch duty rosters matching criteria
         List<DutyRoster> dutyRosters = dutyRosterRepository.searchDutyRoster(doctorId, specializationId, dutyDate);
 
-        // Collect duty roster IDs for batch fetching booked appointments
         List<Long> dutyRosterIds = dutyRosters.stream()
                 .map(DutyRoster::getId)
                 .collect(Collectors.toList());
 
-        // Batch fetch BookAppointments to avoid huge IN clause
         List<BookAppointment> bookedAppointments = new ArrayList<>();
         int batchSize = 100;
         for (int i = 0; i < dutyRosterIds.size(); i += batchSize) {
@@ -52,7 +73,6 @@ public class DutyRosterService {
             bookedAppointments.addAll(bookAppointmentRepository.findByDutyRosterIdIn(batch));
         }
 
-        // Map dutyRosterId -> list of booked appointment times (as Strings)
         Map<Long, List<String>> bookedTimesMap = bookedAppointments.stream()
                 .collect(Collectors.groupingBy(
                         ba -> ba.getDutyRoster().getId(),
@@ -61,7 +81,6 @@ public class DutyRosterService {
 
         List<DoctorDutyScheduleDto> result = new ArrayList<>();
 
-        // Group duty rosters by doctorId to avoid N+1 query problem
         Map<Long, List<DutyRoster>> grouped = dutyRosters.stream()
                 .collect(Collectors.groupingBy(dr -> dr.getDoctor().getId()));
 
@@ -69,7 +88,6 @@ public class DutyRosterService {
             Long docId = entry.getKey();
             List<DutyRoster> rosters = entry.getValue();
 
-            // Since all rosters have the same doctor, pick first to get Doctor object
             Doctor doctor = rosters.get(0).getDoctor();
 
             List<DutySlotDto> duration = rosters.stream().map(roster -> {
@@ -97,13 +115,11 @@ public class DutyRosterService {
             result.add(dto);
         }
 
-        // Log Hibernate query statistics to monitor SQL queries executed
         logQueryStats();
 
         return result;
     }
 
-    // Utility method to log Hibernate SQL query stats
     private void logQueryStats() {
         SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
         Statistics stats = sessionFactory.getStatistics();
