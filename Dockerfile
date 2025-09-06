@@ -1,14 +1,22 @@
-# Use Eclipse Temurin OpenJDK as base
-FROM eclipse-temurin:17-jdk-alpine
-
-# Set working directory
+# Step 1: Use Maven to build the application
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
 
-# Copy built JAR file
-COPY target/Healthcare-0.0.1-SNAPSHOT.jar app.jar
+# Copy all source code
+COPY . .
 
-# Expose port (important for Render)
+# Build the project (skipping tests is optional)
+RUN mvn clean package -DskipTests
+
+# Step 2: Run the built JAR in a smaller JDK image
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
+
+# Copy only the built JAR from the previous stage
+COPY --from=builder /app/target/Healthcare-0.0.1-SNAPSHOT.jar app.jar
+
+# Expose port 8080 (important for Render)
 EXPOSE 8080
 
-# Run the JAR
+# Start the Spring Boot application
 ENTRYPOINT ["java", "-jar", "app.jar"]
