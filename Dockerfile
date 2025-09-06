@@ -1,11 +1,14 @@
-# Base image
-FROM eclipse-temurin:21-jdk
+# Use Eclipse Temurin OpenJDK as base
+FROM eclipse-temurin:17-jdk-alpine
 
-# Create app directory
+# Set working directory
 WORKDIR /app
 
-# Copy built jar file
+# Copy built JAR file
 COPY target/Healthcare-0.0.1-SNAPSHOT.jar app.jar
 
-# Run the jar file
+# Expose port (important for Render)
+EXPOSE 8080
+
+# Run the JAR
 ENTRYPOINT ["java", "-jar", "app.jar"]

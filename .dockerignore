@@ -1,0 +1,7 @@
+target/*.original
+**/*.iml
+.idea/
+.vscode/
+*.md
+.git
+.gitignore
