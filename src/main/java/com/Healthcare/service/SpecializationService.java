@@ -1,0 +1,35 @@
+package com.Healthcare.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.Healthcare.model.Specialization;
+import com.Healthcare.repository.SpecializationRepository;
+
+import java.util.List;
+
+@Service
+public class SpecializationService {
+
+    @Autowired
+    private SpecializationRepository specializationRepository;
+
+    // Add new specialization
+    public Specialization addSpecialization(Specialization specialization) {
+        return specializationRepository.save(specialization);
+    }
+
+    public void saveAll(List<Specialization> specializations) {
+        specializationRepository.saveAll(specializations);
+    }
+    
+    // Get all specializations
+    public List<Specialization> getAllSpecializations() {
+        return specializationRepository.findAll();
+    }
+
+    // Get specialization by ID
+    public Specialization getSpecializationById(Long id) {
+        return specializationRepository.findById(id).orElse(null);
+    }
+}
