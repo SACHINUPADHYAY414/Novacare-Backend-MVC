@@ -14,10 +14,16 @@ public class SpecializationService {
     @Autowired
     private SpecializationRepository specializationRepository;
 
-    // Add new specialization
+    // Add in bulk
     public Specialization addSpecialization(Specialization specialization) {
         return specializationRepository.save(specialization);
     }
+
+    // add one
+    public void save(Specialization specialization) {
+        specializationRepository.save(specialization);
+    }
+
 
     public void saveAll(List<Specialization> specializations) {
         specializationRepository.saveAll(specializations);
@@ -31,5 +37,14 @@ public class SpecializationService {
     // Get specialization by ID
     public Specialization getSpecializationById(Long id) {
         return specializationRepository.findById(id).orElse(null);
+    }
+    
+    public boolean deleteById(Long id) {
+        if (specializationRepository.existsById(id)) {
+            specializationRepository.deleteById(id);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

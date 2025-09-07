@@ -1,7 +1,9 @@
 package com.Healthcare.service;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.Healthcare.model.City;
@@ -21,8 +23,9 @@ public class CityService {
         return cityRepository.findById(id).orElse(null);
     }
 
+    // Cities by state sorted by name ascending
     public List<City> getCitiesByStateId(int stateId) {
-        return cityRepository.findByStateStateId(stateId);
+        return cityRepository.findByStateStateId(stateId, Sort.by(Sort.Direction.ASC, "name"));
     }
 
     public City createCity(City city) {

@@ -1,6 +1,7 @@
 package com.Healthcare.controller;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class CityController {
         return cityService.getCityById(id);
     }
 
+    // Cities sorted by name (A to Z) filtered by state
     @GetMapping("/state/{stateId}")
     public List<City> getCitiesByState(@PathVariable int stateId) {
         return cityService.getCitiesByStateId(stateId);
@@ -33,7 +35,6 @@ public class CityController {
     public List<City> createCities(@RequestBody List<City> cities) {
         return cityService.createCities(cities);
     }
-
 
     @DeleteMapping("/{id}")
     public String deleteCity(@PathVariable int id) {

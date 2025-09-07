@@ -19,6 +19,12 @@ public class SpecializationController {
 
     // Add new specialization
     @PostMapping("/add")
+    public ResponseEntity<String> addSpecialization(@RequestBody Specialization specialization) {
+        specializationService.save(specialization);
+        return ResponseEntity.ok("Specialization added successfully");
+    }
+
+    @PostMapping("/addAll")
     public ResponseEntity<String> addSpecializations(@RequestBody List<Specialization> specializations) {
         specializationService.saveAll(specializations);
         return ResponseEntity.ok("Specializations added successfully");
@@ -35,7 +41,6 @@ public class SpecializationController {
         return ResponseEntity.ok(list);
     }
 
-
     // Get specialization by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getSpecializationById(@PathVariable Long id) {
@@ -44,5 +49,14 @@ public class SpecializationController {
             return ResponseEntity.status(404).body(Map.of("message", "Specialization not found"));
         }
         return ResponseEntity.ok(specialization);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteSpecialization(@PathVariable Long id) {
+        boolean deleted = specializationService.deleteById(id);
+        if (deleted) {
+            return ResponseEntity.ok("Specialization deleted successfully");
+        } else {
+            return ResponseEntity.status(404).body("Specialization not found");
+        }
     }
 }
