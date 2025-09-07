@@ -55,7 +55,7 @@ public class JwtService {
     public List<String> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
         List<String> roles = claims.get("roles", List.class);
-        return roles != null ? roles : List.of("ROLE_USER");
+        return roles != null ? roles : List.of("USER");
     }
 
     public boolean isTokenValid(String token, String email) {

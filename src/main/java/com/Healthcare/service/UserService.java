@@ -142,9 +142,9 @@ public class UserService {
         // Prepare roles for token
         List<String> roles = new ArrayList<>();
         if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-            roles.add("ROLE_ADMIN");
+            roles.add("ADMIN");
         } else {
-            roles.add("ROLE_USER");
+            roles.add("USER");
         }
 
         String token = jwtService.generateToken(user.getEmail(), roles);
@@ -226,9 +226,9 @@ public class UserService {
         // Roles for JWT
         List<String> roles = new ArrayList<>();
         if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-            roles.add("ROLE_ADMIN");
+            roles.add("ADMIN");
         } else {
-            roles.add("ROLE_USER");
+            roles.add("USER");
         }
 
         String token = jwtService.generateToken(user.getEmail(), roles);
@@ -275,4 +275,27 @@ public class UserService {
         int otp = 100000 + new Random().nextInt(900000);
         return String.valueOf(otp);
     }
+    
+    // ================== ALL USERS FOR ADMIN ACCESS ==================
+    public List<UserResponseDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<UserResponseDto> userDtos = new ArrayList<>();
+        for (User user : users) {
+            userDtos.add(new UserResponseDto(
+                    user.getId(),
+                    user.getTitle(),
+                    user.getName(),
+                    user.getGender(),
+                    user.getEmail(),
+                    user.getAddress(),
+                    user.getCity(),
+                    user.getState(),
+                    user.getPinCode(),
+                    user.getMobileNumber(),
+                    user.getRole()
+            ));
+        }
+        return userDtos;
+    }
+
 }

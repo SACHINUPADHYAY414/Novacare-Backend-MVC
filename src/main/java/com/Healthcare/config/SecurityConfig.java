@@ -31,7 +31,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/appointments/**").permitAll()
                 .requestMatchers("/api/states/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().hasAnyRole("USER","ADMIN")
+                
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
