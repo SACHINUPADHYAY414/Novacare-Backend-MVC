@@ -5,7 +5,6 @@ import com.Healthcare.model.User;
 import com.Healthcare.repository.CityRepository;
 import com.Healthcare.repository.StateRepository;
 import com.Healthcare.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,15 +35,15 @@ public class AdminController {
     }
 
     @PostMapping("/verify-user")
-    public ResponseEntity<String> verifyUser(@RequestParam String email) {
+    public ResponseEntity<?> verifyUser(@RequestParam String email) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             user.setVerified(true);
             userRepository.save(user);
-            return ResponseEntity.ok("User verified successfully.");
+            return ResponseEntity.ok(Map.of("message", "User verified successfully"));
         }
-        return ResponseEntity.badRequest().body("User not found.");
+        return ResponseEntity.badRequest().body(Map.of("message", "User not found"));
     }
 
     @PostMapping("/user")
@@ -52,11 +51,9 @@ public class AdminController {
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             return ResponseEntity.status(409).body(Map.of("message", "User with this email already exists"));
         }
-
         if (dto.getCity() != null && cityRepository.findById(dto.getCity()).isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid city ID"));
         }
-
         if (dto.getState() != null && stateRepository.findById(dto.getState()).isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid state ID"));
         }
@@ -67,13 +64,13 @@ public class AdminController {
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setAddress(dto.getAddress());
-        user.setCity(dto.getCity().longValue());
-        user.setState(dto.getState().longValue());
+        user.setCity(dto.getCity() != null ? dto.getCity().longValue() : null);
+        user.setState(dto.getState() != null ? dto.getState().longValue() : null);
         user.setPinCode(dto.getPinCode());
         user.setMobileNumber(dto.getMobileNumber());
         user.setGender(dto.getGender());
         user.setRole(dto.getRole() != null ? dto.getRole() : "USER");
-        user.setVerified(true);  // Admin-created users are auto-verified
+        user.setVerified(true);
         user.setOtp(null);
         user.setOtpExpiry(LocalDateTime.now());
 
@@ -83,9 +80,11 @@ public class AdminController {
 
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
-        return userRepository.findById(id)
-                .map(user -> ResponseEntity.ok(user))
-                .orElse(ResponseEntity.status(404).body(Map.of("message", "User not found")));
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "User not found"));
+        }
+        return ResponseEntity.ok(optionalUser.get());
     }
 
     @PutMapping("/user/{id}")
@@ -94,14 +93,13 @@ public class AdminController {
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("message", "User not found"));
         }
-
         User user = optionalUser.get();
         user.setTitle(dto.getTitle());
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setAddress(dto.getAddress());
-        user.setCity(dto.getCity().longValue());
-        user.setState(dto.getState().longValue());
+        user.setCity(dto.getCity() != null ? dto.getCity().longValue() : null);
+        user.setState(dto.getState() != null ? dto.getState().longValue() : null);
         user.setPinCode(dto.getPinCode());
         user.setMobileNumber(dto.getMobileNumber());
         user.setGender(dto.getGender());
@@ -119,7 +117,6 @@ public class AdminController {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.status(404).body(Map.of("message", "User not found"));
         }
-
         userRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
