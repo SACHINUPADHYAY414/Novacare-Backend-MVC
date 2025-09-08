@@ -13,7 +13,7 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # Copy only the built JAR from the previous stage
-COPY --from=builder /app/target/Healthcare-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/healthcare-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose port 8080 (important for Render)
 EXPOSE 8080
