@@ -23,5 +23,35 @@ public class DoctorDutyScheduleDto {
     @Valid
     private List<DutySlotDto> duration;
 
-    // Remove manual constructors and getters/setters here
+
+    public Long getDoctorId() {
+        return doctorId;
+    }
+
+    public void setDoctorId(Long doctorId) {
+        this.doctorId = doctorId;
+    }
+
+    public String getDoctorName() {
+        return doctorName;
+    }
+
+    public void setDoctorName(String doctorName) {
+        this.doctorName = doctorName;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+    public List<DutySlotDto> getDuration() {
+        return duration;
+    }
+
+    public void setDuration(List<DutySlotDto> duration) {
+        this.duration = duration;
+    }
 }

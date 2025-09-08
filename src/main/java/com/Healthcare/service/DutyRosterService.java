@@ -40,7 +40,7 @@ public class DutyRosterService {
     public DutyRoster createDutyRoster(DutyRosterDto dto) {
         DutyRoster dutyRoster = new DutyRoster();
 
-        dutyRoster.setDutyDate(dto.getDutyDate().toString()); // Assuming DutyRosterDto has LocalDate dutyDate
+        dutyRoster.setDutyDate(dto.getDutyDate().toString());
         dutyRoster.setFromTime(dto.getFromTime());
         dutyRoster.setToTime(dto.getToTime());
         dutyRoster.setDuration(dto.getDuration());
@@ -59,6 +59,34 @@ public class DutyRosterService {
         return dutyRosterRepository.findAll();
     }
 
+    public DutyRoster updateDutyRoster(Long id, DutyRosterDto dto) {
+        DutyRoster existingRoster = dutyRosterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("DutyRoster not found with id: " + id));
+
+        // Update all fields
+        existingRoster.setDutyDate(dto.getDutyDate().toString());
+        existingRoster.setFromTime(dto.getFromTime());
+        existingRoster.setToTime(dto.getToTime());
+        existingRoster.setDuration(dto.getDuration());
+
+        // If isAvailable false, mark as inactive
+        if (dto.getIsAvailable() != null && !dto.getIsAvailable()) {
+            existingRoster.setIsAvailable(false);
+        } else {
+            existingRoster.setIsAvailable(true);
+        }
+
+        // Update doctor if doctorId provided
+        if (dto.getDoctorId() != null) {
+            Doctor doctor = doctorRepository.findById(dto.getDoctorId())
+                    .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + dto.getDoctorId()));
+            existingRoster.setDoctor(doctor);
+        }
+
+        return dutyRosterRepository.save(existingRoster);
+    }
+
+    
     public List<DoctorDutyScheduleDto> getDoctorDutySchedules(Long doctorId, Long specializationId, String dutyDate) {
         List<DutyRoster> dutyRosters = dutyRosterRepository.searchDutyRoster(doctorId, specializationId, dutyDate);
 

@@ -27,6 +27,10 @@ public class Doctor {
     @JsonProperty("cityId")
     private Long cityId;
     
+    @Column(name = "status")
+    @JsonProperty("status")
+    private Boolean status = true; 
+    
     public Long getId() {
         return id;
     }
@@ -73,6 +77,7 @@ public class Doctor {
     public String getSpecializationName() {
         return specialization != null ? specialization.getName() : null;
     }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -85,5 +90,34 @@ public class Doctor {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public void setStateId(Long stateId) {
+        this.stateId = stateId;
+    }
+
+    public void setCityId(Long cityId) {
+        this.cityId = cityId;
+    }
+
+    public void setQualification(String qualification) {
+        this.qualification = qualification;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
 
 }
