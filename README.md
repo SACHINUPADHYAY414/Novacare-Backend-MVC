@@ -236,7 +236,7 @@ Please follow coding conventions and ensure tests pass.
 ## 📞 Contact
 
 **Sachin Upadhyay**  
-📧 Email: upadhyaysachin@example.com  
+📧 Email: upadhyaysachin@gmail.com  
 📱 Contact: +91 7294890821
 
 ---
