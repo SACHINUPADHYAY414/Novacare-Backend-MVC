@@ -1,22 +1,35 @@
-# Step 1: Use Maven to build the application
+# ----------- Step 1: Build the application using Maven ----------- #
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
+
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy all source code
+# Copy all project files into the container
 COPY . .
 
-# Build the project (skipping tests is optional)
+# Build the project and skip tests to speed up the process
 RUN mvn clean package -DskipTests
 
-# Step 2: Run the built JAR in a smaller JDK image
+
+# ----------- Step 2: Create a lightweight production image ----------- #
 FROM eclipse-temurin:21-jdk
+
+# Set working directory in the production image
 WORKDIR /app
 
-# Copy only the built JAR from the previous stage
+# Copy the built jar file from the builder image
 COPY --from=builder /app/target/healthcare-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose port 8080 (important for Render)
+# Expose the application port (important for Docker/Render)
 EXPOSE 8080
 
-# Start the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Set JVM options for memory management inside Docker container
+ENV JAVA_OPTS="-XX:+UseContainerSupport \
+               -XX:MaxRAMPercentage=75.0 \
+               -XX:InitialRAMPercentage=50.0 \
+               -XX:+HeapDumpOnOutOfMemoryError \
+               -XX:HeapDumpPath=/tmp \
+               -XX:+UseG1GC"
+
+# Start the application with the defined JVM options
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
