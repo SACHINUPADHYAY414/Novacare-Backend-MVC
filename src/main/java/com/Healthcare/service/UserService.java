@@ -278,7 +278,7 @@ public class UserService {
     
     // ================== ALL USERS FOR ADMIN ACCESS ==================
     public List<UserResponseDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
+    	  List<User> users = userRepository.findAllByOrderByNameAsc(); 
         List<UserResponseDto> userDtos = new ArrayList<>();
         for (User user : users) {
             userDtos.add(new UserResponseDto(

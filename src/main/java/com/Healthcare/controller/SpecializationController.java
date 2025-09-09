@@ -50,6 +50,18 @@ public class SpecializationController {
         }
         return ResponseEntity.ok(specialization);
     }
+    
+    // Update specialization by ID
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateSpecialization(@PathVariable Long id, @RequestBody Specialization updatedSpecialization) {
+        Specialization specialization = specializationService.updateSpecialization(id, updatedSpecialization);
+        if (specialization == null) {
+            return ResponseEntity.status(404).body(Map.of("message", "Specialization not found"));
+        }
+        return ResponseEntity.ok(Map.of("message", "Specialization updated successfully", "data", specialization));
+    }
+
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSpecialization(@PathVariable Long id) {
         boolean deleted = specializationService.deleteById(id);

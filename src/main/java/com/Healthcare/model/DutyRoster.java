@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class DutyRoster {
@@ -27,13 +26,14 @@ public class DutyRoster {
     @Min(1)
     private Integer duration;
 
-
     private Boolean isAvailable = true;
     
     @ManyToOne(fetch = FetchType.EAGER)
     private Doctor doctor;
 
-    // Getters and setters
+    private String status;
+
+    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -85,5 +85,13 @@ public class DutyRoster {
 
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

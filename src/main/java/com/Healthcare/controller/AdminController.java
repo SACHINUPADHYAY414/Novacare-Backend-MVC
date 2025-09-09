@@ -31,7 +31,7 @@ public class AdminController {
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userRepository.findAll());
+        return ResponseEntity.ok(userRepository.findAllByOrderByNameAsc());
     }
 
     @PostMapping("/verify-user")

@@ -1,6 +1,8 @@
 package com.Healthcare.dto;
 
 import jakarta.validation.constraints.*;
+
+import com.Healthcare.model.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,6 +37,8 @@ public class DutyRosterDto {
 
     private Boolean isAvailable = true;
 
+    private Status status;
+    
     public DutyRosterDto() {}
 
     public DutyRosterDto(Long doctorId, Integer duration, LocalDate dutyDate, LocalTime fromTime, LocalTime toTime, Boolean isAvailable) {
@@ -97,5 +101,13 @@ public class DutyRosterDto {
     // Custom validation method (optional)
     public boolean isValidTimeRange() {
         return fromTime != null && toTime != null && fromTime.isBefore(toTime);
+    }
+    
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

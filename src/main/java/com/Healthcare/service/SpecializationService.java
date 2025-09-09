@@ -31,7 +31,7 @@ public class SpecializationService {
     
     // Get all specializations
     public List<Specialization> getAllSpecializations() {
-        return specializationRepository.findAll();
+        return specializationRepository.findAllByOrderByNameAsc();
     }
 
     // Get specialization by ID
@@ -39,6 +39,13 @@ public class SpecializationService {
         return specializationRepository.findById(id).orElse(null);
     }
     
+    public Specialization updateSpecialization(Long id, Specialization updatedSpecialization) {
+        return specializationRepository.findById(id).map(existing -> {
+            existing.setName(updatedSpecialization.getName());
+            return specializationRepository.save(existing);
+        }).orElse(null);
+    }
+
     public boolean deleteById(Long id) {
         if (specializationRepository.existsById(id)) {
             specializationRepository.deleteById(id);

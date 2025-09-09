@@ -7,5 +7,7 @@ import com.Healthcare.model.Doctor;
 
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
-    List<Doctor> findByStatusTrue();
+		List<Doctor> findByStatusTrueOrderByNameAsc();
+	    List<Doctor> findAllByOrderByNameAsc(); 
+    
 }

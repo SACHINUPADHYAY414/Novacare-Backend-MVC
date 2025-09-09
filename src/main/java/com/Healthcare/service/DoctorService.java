@@ -41,12 +41,13 @@ public class DoctorService {
 
     // Only active doctors
     public List<Doctor> getAllActiveDoctors() {
-        return doctorRepository.findByStatusTrue();
+        return doctorRepository.findByStatusTrueOrderByNameAsc();
     }
+ 
 
     // All doctors (active + inactive)
     public List<Doctor> getAllDoctors() {
-        return doctorRepository.findAll();
+        return doctorRepository.findAllByOrderByNameAsc();
     }
 
     public Doctor getDoctorById(Long id) {
