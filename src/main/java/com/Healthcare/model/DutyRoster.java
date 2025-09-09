@@ -2,15 +2,9 @@ package com.Healthcare.model;
 
 import java.time.LocalTime;
 
-import org.antlr.v4.runtime.misc.NotNull;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class DutyRoster {
@@ -19,22 +13,24 @@ public class DutyRoster {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Duty date is required")
     private String dutyDate;
 
+    @NotNull(message = "From time is required")
     private LocalTime fromTime;
 
+    @NotNull(message = "To time is required")
     private LocalTime toTime;
 
-    @Min(1)
+    @Min(value = 1, message = "Duration must be at least 1 minute")
     private Integer duration;
 
-
+    @NotNull(message = "Availability must be specified")
     private Boolean isAvailable = true;
-    
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Doctor doctor;
 
-    // Getters and setters
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private Doctor doctor;
 
     public Long getId() {
         return id;
