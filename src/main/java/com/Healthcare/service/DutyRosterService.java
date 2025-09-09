@@ -119,20 +119,64 @@ public class DutyRosterService {
     }
     
     public List<DoctorDutyScheduleDto> getDoctorDutySchedules(Long doctorId, Long specializationId, String dutyDate) {
-        List<DutyRoster> rosters = dutyRosterRepository.searchDutyRoster(doctorId, specializationId, dutyDate);
+        List<DutyRoster> dutyRosters = dutyRosterRepository.searchDutyRoster(doctorId, specializationId, dutyDate);
 
-        return rosters.stream().map(duty -> {
+        List<Long> dutyRosterIds = dutyRosters.stream()
+                .map(DutyRoster::getId)
+                .collect(Collectors.toList());
+
+        List<BookAppointment> bookedAppointments = new ArrayList<>();
+        int batchSize = 100;
+        for (int i = 0; i < dutyRosterIds.size(); i += batchSize) {
+            List<Long> batch = dutyRosterIds.subList(i, Math.min(i + batchSize, dutyRosterIds.size()));
+            bookedAppointments.addAll(bookAppointmentRepository.findByDutyRosterIdIn(batch));
+        }
+
+        Map<Long, List<String>> bookedTimesMap = bookedAppointments.stream()
+                .collect(Collectors.groupingBy(
+                        ba -> ba.getDutyRoster().getId(),
+                        Collectors.mapping(ba -> ba.getAppointmentTime().toString(), Collectors.toList())
+                ));
+
+        List<DoctorDutyScheduleDto> result = new ArrayList<>();
+
+        Map<Long, List<DutyRoster>> grouped = dutyRosters.stream()
+                .collect(Collectors.groupingBy(dr -> dr.getDoctor().getId()));
+
+        for (Map.Entry<Long, List<DutyRoster>> entry : grouped.entrySet()) {
+            Long docId = entry.getKey();
+            List<DutyRoster> rosters = entry.getValue();
+
+            Doctor doctor = rosters.get(0).getDoctor();
+
+            List<DutySlotDto> duration = rosters.stream().map(roster -> {
+                DutySlotDto slot = new DutySlotDto();
+                slot.setDutyRosterId(roster.getId());
+                slot.setDutyDate(LocalDate.parse(roster.getDutyDate()));
+                slot.setFromTime(roster.getFromTime());
+                slot.setToTime(roster.getToTime());
+                slot.setDuration(roster.getDuration());
+
+                List<String> bookedTimes = bookedTimesMap.getOrDefault(roster.getId(), List.of());
+                slot.setBookedAppointmentTimes(bookedTimes);
+                slot.setStatus(bookedTimes.isEmpty() ? "AVAILABLE" : "BOOKED");
+
+                return slot;
+            }).collect(Collectors.toList());
+
             DoctorDutyScheduleDto dto = new DoctorDutyScheduleDto();
-            dto.setDoctorId(duty.getDoctor().getId());
-            dto.setDoctorName(duty.getDoctor().getName());
-            dto.setSpecializationName(duty.getDoctor().getSpecialization() != null ? duty.getDoctor().getSpecialization().getName() : null);
-            dto.setDutyDate(LocalDate.parse(duty.getDutyDate()));
-            dto.setFromTime(duty.getFromTime());
-            dto.setToTime(duty.getToTime());
-            dto.setDuration(duty.getDuration());
-            dto.setIsAvailable(duty.getIsAvailable());
-            return dto;
-        }).collect(Collectors.toList());
+            dto.setDoctorId(doctor.getId());
+            dto.setDoctorName(doctor.getName());
+            dto.setSpecialization(
+                    doctor.getSpecialization() != null ? doctor.getSpecialization().getName() : "N/A");
+            dto.setDuration(duration);
+
+            result.add(dto);
+        }
+
+        logQueryStats();
+
+        return result;
     }
 
 }
