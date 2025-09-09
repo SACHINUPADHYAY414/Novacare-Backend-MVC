@@ -67,20 +67,6 @@ public class DutyRosterController {
             return ResponseEntity.notFound().build();
         }
     }
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<DutyRoster> updateDutyRoster(
-//            @PathVariable Long id,
-//            @RequestBody DutyRosterDto dto) {
-//        
-//        System.out.println("doctorId: " + dto.getDoctorId());
-//        System.out.println("duration: " + dto.getDuration());
-//        System.out.println("dutyDate: " + dto.getDutyDate());
-//        System.out.println("fromTime: " + dto.getFromTime());
-//        System.out.println("toTime: " + dto.getToTime());
-//        System.out.println("isAvailable: " + dto.getIsAvailable());
-//
-//        return ResponseEntity.ok().build();
-//    }
 
     @GetMapping("/search-doctor")
     public ResponseEntity<List<DoctorDutyScheduleDto>> searchDoctorDutySchedule(

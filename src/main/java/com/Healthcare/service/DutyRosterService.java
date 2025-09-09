@@ -48,7 +48,7 @@ public class DutyRosterService {
         dutyRoster.setToTime(dto.getToTime());
         dutyRoster.setDuration(dto.getDuration());
         dutyRoster.setIsAvailable(dto.getIsAvailable() != null ? dto.getIsAvailable() : true);
-        dutyRoster.setStatus(dto.getStatus() != null ? dto.getStatus().toUpperCase() : "ACTIVE");
+        dutyRoster.setStatus(dto.getStatus().name());
 
         Doctor doctor = doctorRepository.findById(dto.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + dto.getDoctorId()));
@@ -117,4 +117,22 @@ public class DutyRosterService {
         System.out.println("📦 Entity Fetch Count: " + stats.getEntityFetchCount());
         System.out.println("📑 Collections Fetched: " + stats.getCollectionFetchCount());
     }
+    
+    public List<DoctorDutyScheduleDto> getDoctorDutySchedules(Long doctorId, Long specializationId, String dutyDate) {
+        List<DutyRoster> rosters = dutyRosterRepository.searchDutyRoster(doctorId, specializationId, dutyDate);
+
+        return rosters.stream().map(duty -> {
+            DoctorDutyScheduleDto dto = new DoctorDutyScheduleDto();
+            dto.setDoctorId(duty.getDoctor().getId());
+            dto.setDoctorName(duty.getDoctor().getName());
+            dto.setSpecializationName(duty.getDoctor().getSpecialization() != null ? duty.getDoctor().getSpecialization().getName() : null);
+            dto.setDutyDate(LocalDate.parse(duty.getDutyDate()));
+            dto.setFromTime(duty.getFromTime());
+            dto.setToTime(duty.getToTime());
+            dto.setDuration(duty.getDuration());
+            dto.setIsAvailable(duty.getIsAvailable());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
 }
