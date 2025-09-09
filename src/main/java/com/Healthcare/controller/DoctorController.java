@@ -31,7 +31,7 @@ public class DoctorController {
             @RequestParam("cityId") Long cityId,
             @RequestParam("qualification") String qualification,
             @RequestParam("specializationId") Long specializationId,
-            @RequestParam("profileImageUrl") MultipartFile profileImageUrl) {
+            @RequestParam("profileImageUrl") MultipartFile profileImage) {
         try {
             Doctor doctor = new Doctor();
             doctor.setName(name);
@@ -42,7 +42,7 @@ public class DoctorController {
             doctor.setSpecialization(new Specialization(specializationId, null));
             doctor.setStatus(true);
 
-            String imageUrl = doctorService.saveProfileImage(profileImageUrl);
+            String imageUrl = doctorService.saveProfileImage(profileImage);
             doctor.setProfileImageUrl(imageUrl);
 
             Doctor savedDoctor = doctorService.addDoctor(doctor);
@@ -110,27 +110,22 @@ public class DoctorController {
             @RequestParam("qualification") String qualification,
             @RequestParam("specializationId") Long specializationId,
             @RequestParam("status") Boolean status,
-            @RequestParam(value = "profileImageUrl", required = false) MultipartFile profileImageUrl) {
+            @RequestParam(value = "profileImageUrl", required = false) MultipartFile profileImage) {
         try {
-            Doctor existingDoctor = doctorService.getDoctorById(id);
-            if (existingDoctor == null) {
+            Doctor doctorData = new Doctor();
+            doctorData.setName(name);
+            doctorData.setGender(gender);
+            doctorData.setStateId(stateId);
+            doctorData.setCityId(cityId);
+            doctorData.setQualification(qualification);
+            doctorData.setSpecialization(new Specialization(specializationId, null));
+            doctorData.setStatus(status);
+
+            Doctor updatedDoctor = doctorService.updateDoctor(id, doctorData, profileImage);
+
+            if (updatedDoctor == null) {
                 return ResponseEntity.status(404).body(Map.of("message", "Doctor not found"));
             }
-
-            existingDoctor.setName(name);
-            existingDoctor.setGender(gender);
-            existingDoctor.setStateId(stateId);
-            existingDoctor.setCityId(cityId);
-            existingDoctor.setQualification(qualification);
-            existingDoctor.setSpecialization(new Specialization(specializationId, null));
-            existingDoctor.setStatus(status);
-
-            if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-                String imageUrl = doctorService.saveProfileImage(profileImageUrl);
-                existingDoctor.setProfileImageUrl(imageUrl);
-            }
-
-            Doctor updatedDoctor = doctorService.addDoctor(existingDoctor);
             return ResponseEntity.ok(updatedDoctor);
         } catch (Exception e) {
             e.printStackTrace();
