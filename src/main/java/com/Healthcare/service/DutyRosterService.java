@@ -109,8 +109,6 @@ public class DutyRosterService {
         return dutyRosterRepository.save(existingRoster);
     }
 
-    // ... (rest of your methods remain unchanged)
-
     // For debugging Hibernate queries stats
     private void logQueryStats() {
         SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
