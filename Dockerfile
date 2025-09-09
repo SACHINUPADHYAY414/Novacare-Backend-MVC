@@ -21,7 +21,8 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # ✅ Copy the shaded jar file
-COPY --from=builder /app/target/healthcare-0.0.1-SNAPSHOT-shaded.jar app.jar
+# COPY --from=builder /app/target/healthcare-0.0.1-SNAPSHOT-shaded.jar app.jar
+COPY --from=builder /app/target/healthcare-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
