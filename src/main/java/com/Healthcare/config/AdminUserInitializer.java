@@ -1,4 +1,4 @@
-package com.Healthcare.config;
+package com.healthcare.config;
 
 import java.time.LocalDateTime;
 
@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.Healthcare.model.User;
-import com.Healthcare.repository.UserRepository;
+import com.healthcare.model.User;
+import com.healthcare.repository.UserRepository;
 
 @Configuration
 public class AdminUserInitializer {

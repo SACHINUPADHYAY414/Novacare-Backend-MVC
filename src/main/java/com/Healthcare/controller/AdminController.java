@@ -1,10 +1,10 @@
-package com.Healthcare.controller;
+package com.healthcare.controller;
 
-import com.Healthcare.dto.UserRegistrationDto;
-import com.Healthcare.model.User;
-import com.Healthcare.repository.CityRepository;
-import com.Healthcare.repository.StateRepository;
-import com.Healthcare.repository.UserRepository;
+import com.healthcare.dto.UserRegistrationDto;
+import com.healthcare.model.User;
+import com.healthcare.repository.CityRepository;
+import com.healthcare.repository.StateRepository;
+import com.healthcare.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;

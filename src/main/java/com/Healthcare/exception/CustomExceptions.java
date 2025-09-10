@@ -1,4 +1,4 @@
-package com.Healthcare.exception;
+package com.healthcare.exception;
 
 public class CustomExceptions {
 

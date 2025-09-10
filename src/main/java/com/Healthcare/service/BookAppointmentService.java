@@ -1,14 +1,14 @@
-package com.Healthcare.service;
+package com.healthcare.service;
 
-import com.Healthcare.dto.BookAppointmentDto;
-import com.Healthcare.model.BookAppointment;
-import com.Healthcare.model.Doctor;
-import com.Healthcare.model.DutyRoster;
-import com.Healthcare.model.User;
-import com.Healthcare.repository.BookAppointmentRepository;
-import com.Healthcare.repository.DoctorRepository;
-import com.Healthcare.repository.DutyRosterRepository;
-import com.Healthcare.repository.UserRepository;
+import com.healthcare.dto.BookAppointmentDto;
+import com.healthcare.model.BookAppointment;
+import com.healthcare.model.Doctor;
+import com.healthcare.model.DutyRoster;
+import com.healthcare.model.User;
+import com.healthcare.repository.BookAppointmentRepository;
+import com.healthcare.repository.DoctorRepository;
+import com.healthcare.repository.DutyRosterRepository;
+import com.healthcare.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static com.Healthcare.exception.CustomExceptions.*;
+import static com.healthcare.exception.CustomExceptions.*;
 
 @Service
 public class BookAppointmentService {

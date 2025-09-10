@@ -1,4 +1,4 @@
-package com.Healthcare.service;
+package com.healthcare.service;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -9,16 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.Healthcare.dto.UserLoginDto;
-import com.Healthcare.dto.UserRegistrationDto;
-import com.Healthcare.dto.UserResponseDto;
-import com.Healthcare.dto.OtpVerificationDto;
-import com.Healthcare.model.City;
-import com.Healthcare.model.State;
-import com.Healthcare.model.User;
-import com.Healthcare.repository.CityRepository;
-import com.Healthcare.repository.StateRepository;
-import com.Healthcare.repository.UserRepository;
+import com.healthcare.dto.UserLoginDto;
+import com.healthcare.dto.UserRegistrationDto;
+import com.healthcare.dto.UserResponseDto;
+import com.healthcare.dto.OtpVerificationDto;
+import com.healthcare.model.City;
+import com.healthcare.model.State;
+import com.healthcare.model.User;
+import com.healthcare.repository.CityRepository;
+import com.healthcare.repository.StateRepository;
+import com.healthcare.repository.UserRepository;
 
 
 @Service
@@ -236,66 +236,152 @@ public class UserService {
         response.put("user", userDto);
         response.put("token", token);
         return response;
-    }
-
-    // ================== RESEND OTP ==================
-    public ResponseEntity<Map<String, Object>> resendOtp(String email) {
-        Map<String, Object> response = new HashMap<>();
-        Optional<User> userOpt = userRepository.findByEmail(email);
-
-        if (userOpt.isEmpty()) {
-            response.put("message", "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-
-        User user = userOpt.get();
-
-        String otp = generateOtp();
-        user.setOtp(otp);
-        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
-        userRepository.save(user);
-
-        try {
-            emailService.sendOtpEmail(email, otp);
-        } catch (Exception e) {
-            response.put("message", "Failed to send OTP email");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-
-        response.put("message", user.isVerified()
-                ? "OTP resent for login"
-                : "OTP resent for registration");
-        response.put("email", email);
-
-        return ResponseEntity.ok(response);
-    }
-
-    // ================== GENERATE OTP ==================
-    private String generateOtp() {
-        int otp = 100000 + new Random().nextInt(900000);
-        return String.valueOf(otp);
-    }
-    
-    // ================== ALL USERS FOR ADMIN ACCESS ==================
-    public List<UserResponseDto> getAllUsers() {
-    	  List<User> users = userRepository.findAllByOrderByNameAsc(); 
-        List<UserResponseDto> userDtos = new ArrayList<>();
-        for (User user : users) {
-            userDtos.add(new UserResponseDto(
-                    user.getId(),
-                    user.getTitle(),
-                    user.getName(),
-                    user.getGender(),
-                    user.getEmail(),
-                    user.getAddress(),
-                    user.getCity(),
-                    user.getState(),
-                    user.getPinCode(),
-                    user.getMobileNumber(),
-                    user.getRole()
-            ));
-        }
-        return userDtos;
-    }
+	    }
+	
+	    // ================== RESEND OTP ==================
+	    public ResponseEntity<Map<String, Object>> resendOtp(String email) {
+	        Map<String, Object> response = new HashMap<>();
+	        Optional<User> userOpt = userRepository.findByEmail(email);
+	
+	        if (userOpt.isEmpty()) {
+	            response.put("message", "User not found");
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	        }
+	
+	        User user = userOpt.get();
+	
+	        String otp = generateOtp();
+	        user.setOtp(otp);
+	        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+	        userRepository.save(user);
+	
+	        try {
+	            emailService.sendOtpEmail(email, otp);
+	        } catch (Exception e) {
+	            response.put("message", "Failed to send OTP email");
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	        }
+	
+	        response.put("message", user.isVerified()
+	                ? "OTP resent for login"
+	                : "OTP resent for registration");
+	        response.put("email", email);
+	
+	        return ResponseEntity.ok(response);
+	    }
+	
+	    // ================== GENERATE OTP ==================
+	    private String generateOtp() {
+	        int otp = 100000 + new Random().nextInt(900000);
+	        return String.valueOf(otp);
+	    }
+	    
+	    // ================== ALL USERS FOR ADMIN ACCESS ==================
+	    public List<UserResponseDto> getAllUsers() {
+	    	  List<User> users = userRepository.findAllByOrderByNameAsc(); 
+	        List<UserResponseDto> userDtos = new ArrayList<>();
+	        for (User user : users) {
+	            userDtos.add(new UserResponseDto(
+	                    user.getId(),
+	                    user.getTitle(),
+	                    user.getName(),
+	                    user.getGender(),
+	                    user.getEmail(),
+	                    user.getAddress(),
+	                    user.getCity(),
+	                    user.getState(),
+	                    user.getPinCode(),
+	                    user.getMobileNumber(),
+	                    user.getRole()
+	            ));
+	        }
+	        return userDtos;
+	    }
+	
+	    
+		//    ======= RESET PASSWORD =====
+	    public ResponseEntity<Map<String, Object>> resetPassword(String email, String newPassword) {
+	        Map<String, Object> response = new HashMap<>();
+	
+	        Optional<User> userOpt = userRepository.findByEmail(email);
+	        if (userOpt.isEmpty()) {
+	            response.put("message", "User not found");
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	        }
+	
+	        User user = userOpt.get();
+	
+	        // 🔒 Ensure OTP is already verified
+	        if (user.getOtp() != null || user.getOtpExpiry() != null) {
+	            response.put("message", "OTP verification is required before resetting password");
+	            return ResponseEntity.badRequest().body(response);
+	        }
+	
+	        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+	            response.put("message", "New password must be different from the old password");
+	            return ResponseEntity.badRequest().body(response);
+	        }
+	
+	        user.setPassword(passwordEncoder.encode(newPassword));
+	        userRepository.save(user);
+	
+	        response.put("message", "Password reset successfully");
+	        return ResponseEntity.ok(response);
+	    }
+	
+	
+	    public ResponseEntity<Map<String, Object>> verifyResetOtp(String email, String otp) {
+	        Map<String, Object> response = new HashMap<>();
+	
+	        Optional<User> userOpt = userRepository.findByEmailAndOtp(email, otp);
+	        if (userOpt.isEmpty()) {
+	            response.put("message", "Invalid OTP or email");
+	            return ResponseEntity.badRequest().body(response);
+	        }
+	
+	        User user = userOpt.get();
+	
+	        if (user.getOtpExpiry() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+	            response.put("message", "OTP expired");
+	            return ResponseEntity.badRequest().body(response);
+	        }
+	
+	        // ✅ FIX: Clear OTP here
+	        user.setOtp(null);
+	        user.setOtpExpiry(null);
+	        userRepository.save(user);
+	
+	        response.put("message", "OTP verified. You can now reset your password.");
+	        response.put("email", email);
+	        return ResponseEntity.ok(response);
+	    }
+	
+	
+	    public ResponseEntity<Map<String, Object>> initiatePasswordReset(String email) {
+	        Map<String, Object> response = new HashMap<>();
+	
+	        Optional<User> userOpt = userRepository.findByEmail(email);
+	        if (userOpt.isEmpty()) {
+	            response.put("message", "User not found");
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	        }
+	
+	        User user = userOpt.get();
+	
+	        String otp = generateOtp();
+	        user.setOtp(otp);
+	        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+	        userRepository.save(user);
+	
+	        try {
+	            emailService.sendOtpEmail(email, otp);
+	            response.put("message", "OTP sent to your email");
+	            response.put("email", email);
+	            return ResponseEntity.ok(response);
+	        } catch (Exception e) {
+	            response.put("message", "Failed to send OTP email");
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	        }
+	    }
 
 }

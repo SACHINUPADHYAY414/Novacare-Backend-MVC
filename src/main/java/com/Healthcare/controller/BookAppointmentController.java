@@ -1,8 +1,8 @@
-package com.Healthcare.controller;
+package com.healthcare.controller;
 
-import com.Healthcare.dto.BookAppointmentDto;
-import com.Healthcare.model.BookAppointment;
-import com.Healthcare.service.BookAppointmentService;
+import com.healthcare.dto.BookAppointmentDto;
+import com.healthcare.model.BookAppointment;
+import com.healthcare.service.BookAppointmentService;
 
 import java.util.List;
 

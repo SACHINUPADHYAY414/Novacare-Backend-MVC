@@ -1,7 +1,7 @@
-package com.Healthcare.service;
+package com.healthcare.service;
 
-import com.Healthcare.model.Doctor;
-import com.Healthcare.repository.DoctorRepository;
+import com.healthcare.model.Doctor;
+import com.healthcare.repository.DoctorRepository;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;

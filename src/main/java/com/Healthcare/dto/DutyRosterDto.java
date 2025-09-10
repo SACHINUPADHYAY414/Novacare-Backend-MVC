@@ -1,8 +1,8 @@
-package com.Healthcare.dto;
+package com.healthcare.dto;
 
 import jakarta.validation.constraints.*;
 
-import com.Healthcare.model.Status;
+import com.healthcare.model.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,12 +1,12 @@
-package com.Healthcare.controller;
+package com.healthcare.controller;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.Healthcare.model.City;
-import com.Healthcare.service.CityService;
+import com.healthcare.model.City;
+import com.healthcare.service.CityService;
 
 @RestController
 @RequestMapping("/api/cities")

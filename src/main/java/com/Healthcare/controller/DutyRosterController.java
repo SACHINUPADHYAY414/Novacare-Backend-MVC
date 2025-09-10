@@ -1,10 +1,10 @@
-package com.Healthcare.controller;
+package com.healthcare.controller;
 
-import com.Healthcare.dto.DoctorDutyScheduleDto;
-import com.Healthcare.dto.DutyRosterDto;
-import com.Healthcare.dto.DutyRosterResponseDto;
-import com.Healthcare.model.DutyRoster;
-import com.Healthcare.service.DutyRosterService;
+import com.healthcare.dto.DoctorDutyScheduleDto;
+import com.healthcare.dto.DutyRosterDto;
+import com.healthcare.dto.DutyRosterResponseDto;
+import com.healthcare.model.DutyRoster;
+import com.healthcare.service.DutyRosterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

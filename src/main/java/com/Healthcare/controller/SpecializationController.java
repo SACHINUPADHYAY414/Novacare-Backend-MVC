@@ -1,11 +1,11 @@
-package com.Healthcare.controller;
+package com.healthcare.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.Healthcare.model.Specialization;
-import com.Healthcare.service.SpecializationService;
+import com.healthcare.model.Specialization;
+import com.healthcare.service.SpecializationService;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.Healthcare.config;
+package com.healthcare.config;
 
 import java.util.Map;
 

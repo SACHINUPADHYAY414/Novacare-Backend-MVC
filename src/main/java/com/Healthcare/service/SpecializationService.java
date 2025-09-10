@@ -1,10 +1,10 @@
-package com.Healthcare.service;
+package com.healthcare.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.Healthcare.model.Specialization;
-import com.Healthcare.repository.SpecializationRepository;
+import com.healthcare.model.Specialization;
+import com.healthcare.repository.SpecializationRepository;
 
 import java.util.List;
 

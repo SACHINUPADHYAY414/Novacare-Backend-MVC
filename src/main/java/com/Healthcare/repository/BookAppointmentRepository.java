@@ -1,6 +1,6 @@
-package com.Healthcare.repository;
+package com.healthcare.repository;
 
-import com.Healthcare.model.BookAppointment;
+import com.healthcare.model.BookAppointment;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

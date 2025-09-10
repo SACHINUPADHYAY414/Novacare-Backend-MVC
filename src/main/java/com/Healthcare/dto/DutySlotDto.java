@@ -1,4 +1,4 @@
-package com.Healthcare.dto;
+package com.healthcare.dto;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;

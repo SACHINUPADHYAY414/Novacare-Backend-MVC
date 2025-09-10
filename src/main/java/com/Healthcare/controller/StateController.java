@@ -1,4 +1,4 @@
-package com.Healthcare.controller;
+package com.healthcare.controller;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.Healthcare.model.State;
-import com.Healthcare.service.StateService;
+import com.healthcare.model.State;
+import com.healthcare.service.StateService;
 
 @RestController
 @RequestMapping("/api/states")

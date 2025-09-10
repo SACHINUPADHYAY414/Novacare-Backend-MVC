@@ -1,8 +1,8 @@
-package com.Healthcare.controller;
+package com.healthcare.controller;
 
-import com.Healthcare.model.Doctor;
-import com.Healthcare.model.Specialization;
-import com.Healthcare.service.DoctorService;
+import com.healthcare.model.Doctor;
+import com.healthcare.model.Specialization;
+import com.healthcare.service.DoctorService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

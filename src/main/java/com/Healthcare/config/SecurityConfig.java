@@ -1,4 +1,4 @@
-// package com.Healthcare.config;
+// package com.healthcare.config;
 
 // import java.util.List;
 // import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@
 // import org.springframework.security.web.SecurityFilterChain;
 // import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 // import org.springframework.web.cors.*;
-// import com.Healthcare.security.JwtAuthenticationFilter;
+// import com.healthcare.security.JwtAuthenticationFilter;
 
 // @Configuration
 // public class SecurityConfig {
@@ -62,7 +62,7 @@
 //     }
 // }
 
-package com.Healthcare.config;
+package com.healthcare.config;
 
 import java.util.List;
 
@@ -78,7 +78,7 @@ import org.springframework.web.filter.CorsFilter;                       // <--- 
 import org.springframework.core.Ordered;                            // <--- UPDATED: Import Ordered
 import org.springframework.core.annotation.Order;                  // <--- UPDATED: Import Order annotation
 
-import com.Healthcare.security.JwtAuthenticationFilter;
+import com.healthcare.security.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {

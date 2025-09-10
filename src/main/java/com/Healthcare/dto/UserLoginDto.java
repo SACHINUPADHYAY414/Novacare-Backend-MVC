@@ -1,4 +1,4 @@
-package com.Healthcare.dto;
+package com.healthcare.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

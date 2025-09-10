@@ -1,4 +1,4 @@
-package com.Healthcare.service;
+package com.healthcare.service;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.Healthcare.model.City;
-import com.Healthcare.repository.CityRepository;
+import com.healthcare.model.City;
+import com.healthcare.repository.CityRepository;
 
 @Service
 public class CityService {

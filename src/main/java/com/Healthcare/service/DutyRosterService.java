@@ -1,15 +1,15 @@
-package com.Healthcare.service;
+package com.healthcare.service;
 
-import com.Healthcare.dto.DoctorDutyScheduleDto;
-import com.Healthcare.dto.DutyRosterDto;
-import com.Healthcare.dto.DutyRosterResponseDto;
-import com.Healthcare.dto.DutySlotDto;
-import com.Healthcare.model.BookAppointment;
-import com.Healthcare.model.Doctor;
-import com.Healthcare.model.DutyRoster;
-import com.Healthcare.repository.BookAppointmentRepository;
-import com.Healthcare.repository.DutyRosterRepository;
-import com.Healthcare.repository.DoctorRepository;
+import com.healthcare.dto.DoctorDutyScheduleDto;
+import com.healthcare.dto.DutyRosterDto;
+import com.healthcare.dto.DutyRosterResponseDto;
+import com.healthcare.dto.DutySlotDto;
+import com.healthcare.model.BookAppointment;
+import com.healthcare.model.Doctor;
+import com.healthcare.model.DutyRoster;
+import com.healthcare.repository.BookAppointmentRepository;
+import com.healthcare.repository.DutyRosterRepository;
+import com.healthcare.repository.DoctorRepository;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.transaction.Transactional;
 
