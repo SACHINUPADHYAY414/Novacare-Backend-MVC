@@ -89,8 +89,7 @@ public class UserService {
             userRepository.save(user);
 
             // Send OTP email
-            emailService.sendOtpEmail(user.getEmail(), otp);
-
+            emailService.sendOtpEmail(user.getEmail(), user.getName(), otp);
             response.put("message", "OTP sent to your email");
             response.put("email", user.getEmail());
             return ResponseEntity.ok(response);
@@ -181,7 +180,7 @@ public class UserService {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
         userRepository.save(user);
 
-        emailService.sendOtpEmail(user.getEmail(), otp);
+        emailService.sendOtpEmail(user.getEmail(), user.getName(), otp);
 
         response.put("message", "OTP sent to your email for login verification");
         response.put("email", user.getEmail());
@@ -256,7 +255,7 @@ public class UserService {
 	        userRepository.save(user);
 	
 	        try {
-	            emailService.sendOtpEmail(email, otp);
+	            emailService.sendOtpEmail(user.getEmail(), user.getName(), otp);
 	        } catch (Exception e) {
 	            response.put("message", "Failed to send OTP email");
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -374,7 +373,7 @@ public class UserService {
 	        userRepository.save(user);
 	
 	        try {
-	            emailService.sendOtpEmail(email, otp);
+	        	emailService.sendOtpEmail(user.getEmail(), user.getName(), otp);
 	            response.put("message", "OTP sent to your email");
 	            response.put("email", email);
 	            return ResponseEntity.ok(response);

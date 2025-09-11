@@ -1,12 +1,18 @@
 package com.healthcare.controller;
 
+import com.healthcare.dto.AppointmentDetailsDto;
 import com.healthcare.dto.UserRegistrationDto;
+import com.healthcare.model.BookAppointment;
+import com.healthcare.model.Doctor;
 import com.healthcare.model.User;
 import com.healthcare.repository.CityRepository;
 import com.healthcare.repository.StateRepository;
 import com.healthcare.repository.UserRepository;
+import com.healthcare.service.BookAppointmentService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +35,10 @@ public class AdminController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private BookAppointmentService appointmentService;
+
+    
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userRepository.findAllByOrderByNameAsc());
@@ -120,4 +130,18 @@ public class AdminController {
         userRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
+    
+    @GetMapping("/appointments-details")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AppointmentDetailsDto>> getAllAppointmentDetails() {
+        List<AppointmentDetailsDto> appointments = appointmentService.getAllAppointments();
+
+        if (appointments.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(appointments);
+    }
+
+
 }

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class DutyRosterService {
@@ -28,6 +29,11 @@ public class DutyRosterService {
     private final DoctorRepository doctorRepository;
     private final BookAppointmentRepository bookAppointmentRepository;
     private final EntityManagerFactory entityManagerFactory;
+    @Value("${duty.search.default-duration-years:2}")
+    private int defaultDurationYears;
+
+    @Value("${duty.search.specialization-duration-months:2}")
+    private int specializationDurationMonths;
 
     public DutyRosterService(DutyRosterRepository dutyRosterRepository,
                              DoctorRepository doctorRepository,
@@ -119,63 +125,72 @@ public class DutyRosterService {
     }
     
     public List<DoctorDutyScheduleDto> getDoctorDutySchedules(Long doctorId, Long specializationId, String dutyDate) {
-        List<DutyRoster> dutyRosters = dutyRosterRepository.searchDutyRoster(doctorId, specializationId, dutyDate);
+        String currentDate = null, endDate = null;
 
-        List<Long> dutyRosterIds = dutyRosters.stream()
-                .map(DutyRoster::getId)
-                .collect(Collectors.toList());
+        if (dutyDate == null) {
+            currentDate = LocalDate.now().toString();
 
-        List<BookAppointment> bookedAppointments = new ArrayList<>();
-        int batchSize = 100;
-        for (int i = 0; i < dutyRosterIds.size(); i += batchSize) {
-            List<Long> batch = dutyRosterIds.subList(i, Math.min(i + batchSize, dutyRosterIds.size()));
-            bookedAppointments.addAll(bookAppointmentRepository.findByDutyRosterIdIn(batch));
+            if (specializationId != null) {
+                endDate = LocalDate.now().plusMonths(specializationDurationMonths).toString();
+            } else {
+                endDate = LocalDate.now().plusYears(defaultDurationYears).toString();
+            }
         }
 
-        Map<Long, List<String>> bookedTimesMap = bookedAppointments.stream()
-                .collect(Collectors.groupingBy(
-                        ba -> ba.getDutyRoster().getId(),
-                        Collectors.mapping(ba -> ba.getAppointmentTime().toString(), Collectors.toList())
-                ));
+        
+        List<DutyRoster> dutyRosters = dutyRosterRepository.searchDutyRoster(
+            doctorId, specializationId, dutyDate, currentDate, endDate);
+
+        List<Long> ids = dutyRosters.stream()
+            .map(DutyRoster::getId)
+            .collect(Collectors.toList());
+
+        List<BookAppointment> booked = new ArrayList<>();
+        int batch = 100;
+        for (int i = 0; i < ids.size(); i += batch) {
+            var part = ids.subList(i, Math.min(i + batch, ids.size()));
+            booked.addAll(bookAppointmentRepository.findByDutyRosterIdIn(part));
+        }
+
+        Map<Long, List<String>> bookedMap = booked.stream()
+            .collect(Collectors.groupingBy(
+                ba -> ba.getDutyRoster().getId(),
+                Collectors.mapping(ba -> ba.getAppointmentTime().toString(), Collectors.toList())
+            ));
 
         List<DoctorDutyScheduleDto> result = new ArrayList<>();
+        var grouped = dutyRosters.stream()
+            .collect(Collectors.groupingBy(dr -> dr.getDoctor().getId()));
 
-        Map<Long, List<DutyRoster>> grouped = dutyRosters.stream()
-                .collect(Collectors.groupingBy(dr -> dr.getDoctor().getId()));
+        for (var entry : grouped.entrySet()) {
+            var docId = entry.getKey();
+            var rosters = entry.getValue();
+            var doctor = rosters.get(0).getDoctor();
 
-        for (Map.Entry<Long, List<DutyRoster>> entry : grouped.entrySet()) {
-            Long docId = entry.getKey();
-            List<DutyRoster> rosters = entry.getValue();
-
-            Doctor doctor = rosters.get(0).getDoctor();
-
-            List<DutySlotDto> duration = rosters.stream().map(roster -> {
+            List<DutySlotDto> slots = rosters.stream().map(r -> {
                 DutySlotDto slot = new DutySlotDto();
-                slot.setDutyRosterId(roster.getId());
-                slot.setDutyDate(LocalDate.parse(roster.getDutyDate()));
-                slot.setFromTime(roster.getFromTime());
-                slot.setToTime(roster.getToTime());
-                slot.setDuration(roster.getDuration());
+                slot.setDutyRosterId(r.getId());
+                slot.setDutyDate(LocalDate.parse(r.getDutyDate()));
+                slot.setFromTime(r.getFromTime());
+                slot.setToTime(r.getToTime());
+                slot.setDuration(r.getDuration());
 
-                List<String> bookedTimes = bookedTimesMap.getOrDefault(roster.getId(), List.of());
-                slot.setBookedAppointmentTimes(bookedTimes);
-                slot.setStatus(bookedTimes.isEmpty() ? "AVAILABLE" : "BOOKED");
-
+                var times = bookedMap.getOrDefault(r.getId(), List.of());
+                slot.setBookedAppointmentTimes(times);
+                slot.setStatus(times.isEmpty() ? "AVAILABLE" : "BOOKED");
                 return slot;
-            }).collect(Collectors.toList());
+            }).toList();
 
             DoctorDutyScheduleDto dto = new DoctorDutyScheduleDto();
             dto.setDoctorId(doctor.getId());
             dto.setDoctorName(doctor.getName());
-            dto.setSpecialization(
-                    doctor.getSpecialization() != null ? doctor.getSpecialization().getName() : "N/A");
-            dto.setDuration(duration);
-
+            dto.setSpecialization(doctor.getSpecialization() != null
+                ? doctor.getSpecialization().getName() : "N/A");
+            dto.setDuration(slots);
             result.add(dto);
         }
 
         logQueryStats();
-
         return result;
     }
 

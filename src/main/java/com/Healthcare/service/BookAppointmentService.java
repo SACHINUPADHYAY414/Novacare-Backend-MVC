@@ -1,5 +1,6 @@
 package com.healthcare.service;
 
+import com.healthcare.dto.AppointmentDetailsDto;
 import com.healthcare.dto.BookAppointmentDto;
 import com.healthcare.model.BookAppointment;
 import com.healthcare.model.Doctor;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.healthcare.exception.CustomExceptions.*;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class BookAppointmentService {
@@ -78,14 +80,29 @@ public class BookAppointmentService {
     }
 
     private void sendConfirmationEmail(User user, Doctor doctor, BookAppointment appointment) {
-        String subject = "Appointment Confirmed";
-        String body = "Dear " + user.getName() + ",\n\n" +
-                "Your appointment is confirmed with the following details:\n\n" +
-                "Doctor: " + doctor.getName() + "\n" +
-                "Date: " + appointment.getAppointmentDate() + "\n" +
-                "Time: " + appointment.getAppointmentTime() + "\n" +
-                "Status: " + appointment.getStatus() + "\n\n" +
-                "Thank you for choosing our service!";
+        String subject = "Novacare: Appointment Confirmation";
+
+        // Format date to dd-MM-yyyy
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String formattedDate = appointment.getAppointmentDate().format(dateFormatter);
+
+        // Use user's name or fallback
+        String name = (user.getName() != null && !user.getName().trim().isEmpty())
+            ? user.getName().trim()
+            : "Valued Patient";
+
+        String body = "Dear " + name + ",\n\n"
+                + "We're pleased to confirm your appointment at Novacare.\n\n"
+                + "Here are the appointment details:\n\n"
+                + "👨‍⚕️ Doctor: Dr. " + doctor.getName() + "\n"
+                + "📅 Date: " + formattedDate + "\n"
+                + "⏰ Time: " + appointment.getAppointmentTime() + "\n"
+                + "🔖 Status: " + appointment.getStatus() + "\n\n"
+                + "📝 Please arrive 10 minutes early and bring any relevant documents.\n\n"
+                + "If you need to modify or cancel your appointment, feel free to contact our support team.\n\n"
+                + "Thank you for trusting Novacare with your health.\n\n"
+                + "Warm regards,\n"
+                + "The Novacare Team";
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
@@ -93,7 +110,15 @@ public class BookAppointmentService {
         message.setText(body);
         mailSender.send(message);
     }
+
     public List<BookAppointment> getAppointmentsByUserId(Long userId) {
         return appointmentRepository.findByUserId(userId);
     }
+    
+
+    public List<AppointmentDetailsDto> getAllAppointments() {
+        return appointmentRepository.findAllAppointmentsWithUserAndDoctor();
+    }
+
+
 }

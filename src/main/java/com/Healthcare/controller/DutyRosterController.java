@@ -74,18 +74,17 @@ public class DutyRosterController {
             @RequestParam(required = false) Long specializationId,
             @RequestParam(required = false) String dutyDate) {
 
-        System.out.println("Received search params - doctorId: " + doctorId + 
-                           ", specializationId: " + specializationId + 
+        System.out.println("Received search params - doctorId: " + doctorId +
+                           ", specializationId: " + specializationId +
                            ", dutyDate: " + dutyDate);
 
-        List<DoctorDutyScheduleDto> result = dutyRosterService.getDoctorDutySchedules(doctorId, specializationId, dutyDate);
+        List<DoctorDutyScheduleDto> result =
+            dutyRosterService.getDoctorDutySchedules(doctorId, specializationId, dutyDate);
 
         if (result.isEmpty()) {
             return ResponseEntity.status(404).body(List.of());
         }
-
         return ResponseEntity.ok(result);
     }
-
-
+    
 }
