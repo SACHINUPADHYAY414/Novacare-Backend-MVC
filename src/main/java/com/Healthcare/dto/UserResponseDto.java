@@ -19,4 +19,6 @@ public class UserResponseDto {
     private String pinCode;
     private String mobileNumber;
     private String role;
+    private String uhid;
+
 }

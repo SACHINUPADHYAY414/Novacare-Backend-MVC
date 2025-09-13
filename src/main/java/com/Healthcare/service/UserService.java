@@ -40,6 +40,13 @@ public class UserService {
     private StateRepository stateRepository;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    
+	private String generateUhid() {
+	    Long maxNumber = userRepository.findMaxUhidNumber();
+	    if (maxNumber == null) maxNumber = 0L;
+	    long nextNumber = maxNumber + 1;
+	    return "UHID" + nextNumber;
+	}
 
     // ================== REGISTER ==================
     public ResponseEntity<Map<String, Object>> registerUser(UserRegistrationDto dto) {
@@ -80,6 +87,7 @@ public class UserService {
             user.setGender(dto.getGender());
             user.setVerified(false);
             user.setRole(dto.getRole() != null && dto.getRole().equalsIgnoreCase("ADMIN") ? "ADMIN" : "USER");
+            user.setUhid(generateUhid());
 
             // Generate OTP
             String otp = generateOtp();
@@ -125,18 +133,19 @@ public class UserService {
         userRepository.save(user);
 
         UserResponseDto userDto = new UserResponseDto(
-                user.getId(),
-                user.getTitle(),
-                user.getName(),
-                user.getGender(),
-                user.getEmail(),
-                user.getAddress(),
-                user.getCity(),
-                user.getState(),
-                user.getPinCode(),
-                user.getMobileNumber(),
-                user.getRole()
-        );
+        	    user.getId(),
+        	    user.getTitle(),
+        	    user.getName(),
+        	    user.getGender(),
+        	    user.getEmail(),
+        	    user.getAddress(),
+        	    user.getCity(),
+        	    user.getState(),
+        	    user.getPinCode(),
+        	    user.getMobileNumber(),
+        	    user.getRole(),
+        	    user.getUhid()
+        	);
 
         // Prepare roles for token
         List<String> roles = new ArrayList<>();
@@ -219,7 +228,8 @@ public class UserService {
                 user.getState(),
                 user.getPinCode(),
                 user.getMobileNumber(),
-                user.getRole()
+                user.getRole(),
+                user.getUhid()
         );
 
         // Roles for JWT
@@ -291,7 +301,8 @@ public class UserService {
 	                    user.getState(),
 	                    user.getPinCode(),
 	                    user.getMobileNumber(),
-	                    user.getRole()
+	                    user.getRole(),
+	                    user.getUhid() 
 	            ));
 	        }
 	        return userDtos;
