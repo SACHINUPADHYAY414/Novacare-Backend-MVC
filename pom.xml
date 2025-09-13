@@ -51,14 +51,13 @@
         </dependency>
         
         <!-- Lombok -->
-	   <dependency>
-	    <groupId>org.projectlombok</groupId>
-	    <artifactId>lombok</artifactId>
-	    <!-- No version tag, use managed version -->
-	    <scope>provided</scope>
-		</dependency>
-	
-
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.40</version>
+            <scope>provided</scope>
+        </dependency>
+        
         <!-- Database -->
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -107,22 +106,22 @@
     <build>
         <plugins>
             <!-- Compiler plugin for Java 21 and Lombok annotation processing -->
-           <plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-compiler-plugin</artifactId>
-		    <configuration>
-		        <source>21</source>
-		        <target>21</target>
-		        <annotationProcessorPaths>
-		            <path>
-		                <groupId>org.projectlombok</groupId>
-		                <artifactId>lombok</artifactId>
-		                <!-- Same version as dependency, or omit if using managed version -->
-		            </path>
-		        </annotationProcessorPaths>
-		    </configuration>
-		 </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.40</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
 
             <!-- Spring Boot plugin with layered jar enabled -->
             <plugin>
@@ -139,7 +138,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
