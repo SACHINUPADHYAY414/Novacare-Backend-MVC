@@ -2,6 +2,8 @@ package com.healthcare.service;
 
 import com.healthcare.dto.AppointmentDetailsDto;
 import com.healthcare.dto.BookAppointmentDto;
+import com.healthcare.exception.CustomExceptions.ResourceNotFoundException;
+import com.healthcare.exception.CustomExceptions.TimeSlotAlreadyBookedException;
 import com.healthcare.model.BookAppointment;
 import com.healthcare.model.Doctor;
 import com.healthcare.model.DutyRoster;
@@ -12,6 +14,7 @@ import com.healthcare.repository.DutyRosterRepository;
 import com.healthcare.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -40,8 +43,23 @@ public class BookAppointmentService {
     @Autowired
     private JavaMailSender mailSender;
 
+    // Toggle OTP skipping, if used elsewhere
+    @Value("${app.security.skip-otp:false}")
+    private boolean skipOtp;
+
+    public boolean isSkipOtp() {
+        return skipOtp;
+    }
+
+    // Convenience overloaded method: calls main booking method with skipEmail=false
     @Transactional
     public BookAppointment bookAppointment(BookAppointmentDto dto) {
+        return bookAppointment(dto, false);
+    }
+
+    @Transactional
+    public BookAppointment bookAppointment(BookAppointmentDto dto, boolean skipEmail) {
+        // Check if the time slot is already booked
         Optional<BookAppointment> existing = appointmentRepository
                 .findByDutyRosterIdAndAppointmentDateAndAppointmentTime(
                         dto.getDutyRosterId(),
@@ -74,22 +92,29 @@ public class BookAppointmentService {
         dutyRoster.setIsAvailable(false);
         dutyRosterRepository.save(dutyRoster);
 
-        sendConfirmationEmail(user, doctor, appointment);
+        // Send confirmation email only if skipEmail is false
+        if (!skipEmail) {
+            sendConfirmationEmail(user, doctor, appointment);
+        }
 
         return appointment;
     }
 
     private void sendConfirmationEmail(User user, Doctor doctor, BookAppointment appointment) {
+        // Check if user email is available
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            // Could log this situation, or silently ignore email sending
+            return;
+        }
+
         String subject = "Novacare: Appointment Confirmation";
 
-        // Format date to dd-MM-yyyy
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String formattedDate = appointment.getAppointmentDate().format(dateFormatter);
 
-        // Use user's name or fallback
         String name = (user.getName() != null && !user.getName().trim().isEmpty())
-            ? user.getName().trim()
-            : "Valued Patient";
+                ? user.getName().trim()
+                : "Valued Patient";
 
         String body = "Dear " + name + ",\n\n"
                 + "We're pleased to confirm your appointment at Novacare.\n\n"
@@ -111,14 +136,13 @@ public class BookAppointmentService {
         mailSender.send(message);
     }
 
-    public List<BookAppointment> getAppointmentsByUserId(Long userId) {
-        return appointmentRepository.findByUserId(userId);
+    public List<AppointmentDetailsDto> getAppointmentsByUserId(Long userId) {
+        return appointmentRepository.findAppointmentsByUserId(userId);
     }
-    
+
 
     public List<AppointmentDetailsDto> getAllAppointments() {
         return appointmentRepository.findAllAppointmentsWithUserAndDoctor();
     }
-
 
 }

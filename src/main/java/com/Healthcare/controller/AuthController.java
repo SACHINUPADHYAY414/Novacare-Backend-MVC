@@ -19,50 +19,61 @@ import com.healthcare.service.UserService;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	    @Autowired
-	    private UserService userService;
+    @Autowired
+    private UserService userService;
 
-	    @Autowired
-	    private JwtService jwtService;
-	    
-	 // ================= REGISTER NEW ACCOUNT =================
-	    @PostMapping("/register")
-	    public ResponseEntity<Map<String, Object>> register(@RequestBody UserRegistrationDto dto) {
-	        // Directly return the ResponseEntity from service
-	        return userService.registerUser(dto);
-	    }
-	
-	 // ================= VERIFY REGISTER OTP =================
-	    @PostMapping("/otp-verify")
-	    public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody OtpVerificationDto dto) {
-	        Map<String, Object> response = userService.verifyOtp(dto);
-	
-	        if (response.containsKey("token")) {
-	            return ResponseEntity.ok(response);
-	        }
-	        return ResponseEntity.badRequest().body(response);
-	    }
-	
-	 // ================= RESEND OTP =================
-	    @PostMapping("/resend-otp")
-	    public ResponseEntity<Map<String, Object>> resendOtp(@RequestBody Map<String, String> request) {
-	        String email = request.get("email");
-	        return userService.resendOtp(email);
-	    }
-	
-	
-	    @PostMapping("/login")
-	    public ResponseEntity<?> login(@RequestBody UserLoginDto dto) {
-	        Map<String, Object> response = userService.loginUser(dto);
-	        if ("OTP sent to your email for login verification".equals(response.get("message"))) {
-	            return ResponseEntity.ok(response);
-	        }
-	        return ResponseEntity.badRequest().body(response);
-	    }
-	
-	 // ================= VERIFY LOGIN OTP =================
-	    @PostMapping("/login/otp-verify")
-	    public ResponseEntity<?> verifyLoginOtp(@RequestBody OtpVerificationDto dto) {
+    @Autowired
+    private JwtService jwtService;
+    
+    // ================= REGISTER NEW ACCOUNT =================
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, Object>> register(@RequestBody UserRegistrationDto dto) {
+        ResponseEntity<Map<String, Object>> responseEntity = userService.registerUser(dto);
+        Map<String, Object> body = new HashMap<>(responseEntity.getBody());
+        body.put("otpSkipped", userService.isSkipOtp());
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(body);
+    }
+
+    // ================= VERIFY REGISTER OTP =================
+    @PostMapping("/otp-verify")
+    public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody OtpVerificationDto dto) {
+        Map<String, Object> response = userService.verifyOtp(dto);
+        if (response.containsKey("token")) {
+            response.put("otpSkipped", userService.isSkipOtp());
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // ================= RESEND OTP =================
+    @PostMapping("/resend-otp")
+    public ResponseEntity<Map<String, Object>> resendOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        ResponseEntity<Map<String, Object>> responseEntity = userService.resendOtp(email);
+        Map<String, Object> body = new HashMap<>(responseEntity.getBody());
+        body.put("otpSkipped", userService.isSkipOtp());
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(body);
+    }
+
+    // ================= LOGIN =================
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserLoginDto dto) {
+        Map<String, Object> response = userService.loginUser(dto);
+        response.put("otpSkipped", userService.isSkipOtp());
+
+        // ✅ If login successful or OTP skipped, always return 200
+        if ("OTP sent to your email for login verification".equals(response.get("message")) ||
+            "Login successful.".equals(response.get("message"))) {
+            return ResponseEntity.ok(response);
+        }
+
+        // Invalid credentials or other errors
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // ================= VERIFY LOGIN OTP =================
+    @PostMapping("/login/otp-verify")
+    public ResponseEntity<?> verifyLoginOtp(@RequestBody OtpVerificationDto dto) {
         try {
             Map<String, Object> result = userService.verifyLoginOtp(dto);
 
@@ -90,6 +101,7 @@ public class AuthController {
             response.put("message", "Login successful");
             response.put("token", token != null ? token : "");
             response.put("user", userMap);
+            response.put("otpSkipped", userService.isSkipOtp());
 
             return ResponseEntity.ok(response);
 
@@ -98,8 +110,8 @@ public class AuthController {
             return ResponseEntity.status(500).body(Map.of("message", "Internal server error"));
         }
     }
-    
-    // ================= SECURE GET ALL USERS FOR ADMINS ONLY =================
+
+    // ================= GET ALL USERS FOR ADMINS ONLY =================
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
@@ -125,28 +137,35 @@ public class AuthController {
             return ResponseEntity.status(500).body(Map.of("message", "Failed to fetch users"));
         }
     }
-    
-	    // Step 1: Send OTP
-	    @PostMapping("/reset-password/request")
-	    public ResponseEntity<Map<String, Object>> requestResetPassword(@RequestBody Map<String, String> request) {
-	        return userService.initiatePasswordReset(request.get("email"));
-	    }
-	
-	    // Step 2: Verify OTP
-	    @PostMapping("/reset-password/verify-otp")
-	    public ResponseEntity<Map<String, Object>> verifyResetOtp(@RequestBody Map<String, String> request) {
-	        return userService.verifyResetOtp(request.get("email"), request.get("otp"));
-	    }
-	
-	    // ✅ Step 3: Confirm New Password (email + newPassword only)
-	    @PostMapping("/reset-password/confirm")
-	    public ResponseEntity<Map<String, Object>> confirmResetPassword(@RequestBody Map<String, String> request) {
-	        String email = request.get("email");
-	        String newPassword = request.get("newPassword");
-	        return userService.resetPassword(email, newPassword);
-	    }
 
-    
+    // ================= RESET PASSWORD =================
+
+    // Step 1: Request reset OTP
+    @PostMapping("/reset-password/request")
+    public ResponseEntity<Map<String, Object>> requestResetPassword(@RequestBody Map<String, String> request) {
+        ResponseEntity<Map<String, Object>> responseEntity = userService.initiatePasswordReset(request.get("email"));
+        Map<String, Object> body = new HashMap<>(responseEntity.getBody());
+        body.put("otpSkipped", userService.isSkipOtp());
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(body);
+    }
+
+    // Step 2: Verify reset OTP
+    @PostMapping("/reset-password/verify-otp")
+    public ResponseEntity<Map<String, Object>> verifyResetOtp(@RequestBody Map<String, String> request) {
+        ResponseEntity<Map<String, Object>> responseEntity = userService.verifyResetOtp(request.get("email"), request.get("otp"));
+        Map<String, Object> body = new HashMap<>(responseEntity.getBody());
+        body.put("otpSkipped", userService.isSkipOtp());
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(body);
+    }
+
+    // Step 3: Confirm new password
+    @PostMapping("/reset-password/confirm")
+    public ResponseEntity<Map<String, Object>> confirmResetPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String newPassword = request.get("newPassword");
+        ResponseEntity<Map<String, Object>> responseEntity = userService.resetPassword(email, newPassword);
+        Map<String, Object> body = new HashMap<>(responseEntity.getBody());
+        body.put("otpSkipped", userService.isSkipOtp());
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(body);
+    }
 }
-
-

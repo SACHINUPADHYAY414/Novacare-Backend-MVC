@@ -2,8 +2,7 @@ package com.healthcare.controller;
 
 import com.healthcare.dto.AppointmentDetailsDto;
 import com.healthcare.dto.UserRegistrationDto;
-import com.healthcare.model.BookAppointment;
-import com.healthcare.model.Doctor;
+import com.healthcare.dto.UserResponseDto;
 import com.healthcare.model.User;
 import com.healthcare.repository.CityRepository;
 import com.healthcare.repository.StateRepository;
@@ -38,12 +37,13 @@ public class AdminController {
     @Autowired
     private BookAppointmentService appointmentService;
 
-    
+    // ================= GET ALL USERS =================
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userRepository.findAllByOrderByNameAsc());
     }
 
+    // ================= VERIFY USER =================
     @PostMapping("/verify-user")
     public ResponseEntity<?> verifyUser(@RequestParam String email) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -51,11 +51,30 @@ public class AdminController {
             User user = optionalUser.get();
             user.setVerified(true);
             userRepository.save(user);
-            return ResponseEntity.ok(Map.of("message", "User verified successfully"));
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User verified successfully");
+            response.put("user", new UserResponseDto(
+                    user.getId(),
+                    user.getTitle(),
+                    user.getName(),
+                    user.getGender(),
+                    user.getEmail(),
+                    user.getAddress(),
+                    user.getCity(),
+                    user.getState(),
+                    user.getPinCode(),
+                    user.getMobileNumber(),
+                    user.getRole(),
+                    user.getUhid()
+            ));
+            response.put("otpSkipped", true);
+            return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(Map.of("message", "User not found"));
     }
 
+    // ================= ADD USER =================
     @PostMapping("/user")
     public ResponseEntity<?> addUser(@RequestBody UserRegistrationDto dto) {
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
@@ -85,18 +104,58 @@ public class AdminController {
         user.setOtpExpiry(LocalDateTime.now());
 
         userRepository.save(user);
-        return ResponseEntity.ok(Map.of("message", "User created successfully"));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "User created successfully");
+        response.put("user", new UserResponseDto(
+                user.getId(),
+                user.getTitle(),
+                user.getName(),
+                user.getGender(),
+                user.getEmail(),
+                user.getAddress(),
+                user.getCity(),
+                user.getState(),
+                user.getPinCode(),
+                user.getMobileNumber(),
+                user.getRole(),
+                user.getUhid()
+        ));
+        response.put("otpSkipped", true);
+
+        return ResponseEntity.ok(response);
     }
 
+    // ================= GET USER BY ID =================
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("message", "User not found"));
         }
-        return ResponseEntity.ok(optionalUser.get());
+
+        User user = optionalUser.get();
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", new UserResponseDto(
+                user.getId(),
+                user.getTitle(),
+                user.getName(),
+                user.getGender(),
+                user.getEmail(),
+                user.getAddress(),
+                user.getCity(),
+                user.getState(),
+                user.getPinCode(),
+                user.getMobileNumber(),
+                user.getRole(),
+                user.getUhid()
+        ));
+        response.put("otpSkipped", true);
+
+        return ResponseEntity.ok(response);
     }
 
+    // ================= UPDATE USER =================
     @PutMapping("/user/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserRegistrationDto dto) {
         Optional<User> optionalUser = userRepository.findById(id);
@@ -119,18 +178,42 @@ public class AdminController {
         }
 
         userRepository.save(user);
-        return ResponseEntity.ok(Map.of("message", "User updated successfully"));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "User updated successfully");
+        response.put("user", new UserResponseDto(
+                user.getId(),
+                user.getTitle(),
+                user.getName(),
+                user.getGender(),
+                user.getEmail(),
+                user.getAddress(),
+                user.getCity(),
+                user.getState(),
+                user.getPinCode(),
+                user.getMobileNumber(),
+                user.getRole(),
+                user.getUhid()
+        ));
+        response.put("otpSkipped", true);
+
+        return ResponseEntity.ok(response);
     }
 
+    // ================= DELETE USER =================
     @DeleteMapping("/user/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.status(404).body(Map.of("message", "User not found"));
         }
         userRepository.deleteById(id);
-        return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "User deleted successfully");
+        response.put("otpSkipped", true);
+        return ResponseEntity.ok(response);
     }
-    
+
+    // ================= GET ALL APPOINTMENTS =================
     @GetMapping("/appointments-details")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AppointmentDetailsDto>> getAllAppointmentDetails() {
@@ -142,6 +225,4 @@ public class AdminController {
 
         return ResponseEntity.ok(appointments);
     }
-
-
 }

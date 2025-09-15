@@ -3,6 +3,7 @@ package com.healthcare.config;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +22,14 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthFilter;
+
+    // ✅ Load from application.properties, default false
+    @Value("${app.security.skip-otp:false}")
+    private boolean skipOtp;
+
+    public boolean isSkipOtp() {
+        return skipOtp;
+    }
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -85,4 +94,3 @@ public class SecurityConfig {
         return new CorsFilter(source);
     }
 }
-
