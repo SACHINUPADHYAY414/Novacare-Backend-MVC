@@ -281,7 +281,7 @@ public class UserService {
                     user.getUhid()
             );
 
-            response.put("message", "OTP skipping enabled. Login successful.");
+            response.put("message", "Login successful.");
             response.put("email", user.getEmail());
             response.put("token", token);
             response.put("user", userDto);
@@ -323,7 +323,7 @@ public class UserService {
                     user.getUhid()
             );
 
-            response.put("message", "OTP skipping enabled. Login successful.");
+            response.put("message", "Login successful.");
             response.put("email", user.getEmail());
             response.put("token", token);
             response.put("user", userDto);

@@ -61,16 +61,21 @@ public class AuthController {
         Map<String, Object> response = userService.loginUser(dto);
         response.put("otpSkipped", userService.isSkipOtp());
 
-        // ✅ If login successful or OTP skipped, always return 200
-        if ("OTP sent to your email for login verification".equals(response.get("message")) ||
-            "Login successful.".equals(response.get("message"))) {
+        String message = (String) response.get("message");
+
+        // ✅ Check for success messages more flexibly
+        if (message != null && (
+                message.contains("Login successful") ||
+                message.contains("OTP sent")
+            )) {
             return ResponseEntity.ok(response);
         }
 
-        // Invalid credentials or other errors
+        // ❌ Invalid credentials or other errors
         return ResponseEntity.badRequest().body(response);
     }
 
+    
     // ================= VERIFY LOGIN OTP =================
     @PostMapping("/login/otp-verify")
     public ResponseEntity<?> verifyLoginOtp(@RequestBody OtpVerificationDto dto) {
