@@ -21,8 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import static com.healthcare.exception.CustomExceptions.*;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -43,7 +41,7 @@ public class BookAppointmentService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // Toggle OTP skipping, if used elsewhere
+    // Toggle OTP skipping
     @Value("${app.security.skip-otp:false}")
     private boolean skipOtp;
 
@@ -51,12 +49,13 @@ public class BookAppointmentService {
         return skipOtp;
     }
 
-    // Convenience overloaded method: calls main booking method with skipEmail=false
+    // Book appointment with default skipEmail = false
     @Transactional
     public BookAppointment bookAppointment(BookAppointmentDto dto) {
         return bookAppointment(dto, false);
     }
 
+    // Book appointment with explicit skipEmail control
     @Transactional
     public BookAppointment bookAppointment(BookAppointmentDto dto, boolean skipEmail) {
         // Check if the time slot is already booked
@@ -92,19 +91,19 @@ public class BookAppointmentService {
         dutyRoster.setIsAvailable(false);
         dutyRosterRepository.save(dutyRoster);
 
-        // Send confirmation email only if skipEmail is false
+        // Only send email if skipEmail = false
         if (!skipEmail) {
             sendConfirmationEmail(user, doctor, appointment);
+        } else {
+            System.out.println("⚡ Email skipped due to skipEmail=true");
         }
 
         return appointment;
     }
 
     private void sendConfirmationEmail(User user, Doctor doctor, BookAppointment appointment) {
-        // Check if user email is available
         if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            // Could log this situation, or silently ignore email sending
-            return;
+            return; // ignore if no email
         }
 
         String subject = "Novacare: Appointment Confirmation";
@@ -133,6 +132,7 @@ public class BookAppointmentService {
         message.setTo(user.getEmail());
         message.setSubject(subject);
         message.setText(body);
+
         mailSender.send(message);
     }
 
@@ -140,9 +140,7 @@ public class BookAppointmentService {
         return appointmentRepository.findAppointmentsByUserId(userId);
     }
 
-
     public List<AppointmentDetailsDto> getAllAppointments() {
         return appointmentRepository.findAllAppointmentsWithUserAndDoctor();
     }
-
 }
