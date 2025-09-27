@@ -14,7 +14,6 @@ import com.healthcare.repository.DutyRosterRepository;
 import com.healthcare.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -41,21 +40,6 @@ public class BookAppointmentService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // Toggle OTP skipping
-    @Value("${app.security.skip-otp:false}")
-    private boolean skipOtp;
-
-    public boolean isSkipOtp() {
-        return skipOtp;
-    }
-
-    // Book appointment with default skipEmail = false
-    @Transactional
-    public BookAppointment bookAppointment(BookAppointmentDto dto) {
-        return bookAppointment(dto, false);
-    }
-
-    // Book appointment with explicit skipEmail control
     @Transactional
     public BookAppointment bookAppointment(BookAppointmentDto dto, boolean skipEmail) {
         // Check if the time slot is already booked
@@ -91,7 +75,7 @@ public class BookAppointmentService {
         dutyRoster.setIsAvailable(false);
         dutyRosterRepository.save(dutyRoster);
 
-        // Only send email if skipEmail = false
+        // Email sending controlled by skipEmail flag
         if (!skipEmail) {
             sendConfirmationEmail(user, doctor, appointment);
         } else {
