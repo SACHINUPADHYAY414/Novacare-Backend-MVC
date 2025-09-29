@@ -54,7 +54,7 @@ public class DutyRosterService {
         dutyRoster.setToTime(dto.getToTime());
         dutyRoster.setDuration(dto.getDuration());
         dutyRoster.setIsAvailable(dto.getIsAvailable() != null ? dto.getIsAvailable() : true);
-        dutyRoster.setStatus(dto.getStatus().name());
+        dutyRoster.setStatus(dto.getStatus());
         dutyRoster.setAmount(dto.getAmount());
 
         Doctor doctor = doctorRepository.findById(dto.getDoctorId())
@@ -105,7 +105,7 @@ public class DutyRosterService {
         }
 
         if (dto.getStatus() != null) {
-            existingRoster.setStatus(dto.getStatus().name());
+            existingRoster.setStatus(dto.getStatus());
         }
 
 
