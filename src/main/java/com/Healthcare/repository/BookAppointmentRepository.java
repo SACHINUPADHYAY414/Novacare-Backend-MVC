@@ -29,7 +29,7 @@ public interface BookAppointmentRepository extends JpaRepository<BookAppointment
     @Query("SELECT new com.healthcare.dto.AppointmentDetailsDto(" +
            "b.id, u.id, u.name, u.email, " +
            "d.id, d.name, b.dutyRoster.id, " +
-           "b.status, b.appointmentDate, b.appointmentTime) " +
+           "b.status, b.appointmentDate, b.appointmentTime,b.amount) " +
            "FROM BookAppointment b " +
            "JOIN b.doctor d " +
            "JOIN b.user u")
@@ -38,7 +38,7 @@ public interface BookAppointmentRepository extends JpaRepository<BookAppointment
     @Query("SELECT new com.healthcare.dto.AppointmentDetailsDto(" +
             "b.id, u.id, u.name, u.email, " +
             "d.id, d.name, b.dutyRoster.id, " +
-            "b.status, b.appointmentDate, b.appointmentTime) " +
+            "b.status, b.appointmentDate, b.appointmentTime,b.amount) " +
             "FROM BookAppointment b " +
             "JOIN b.doctor d " +
             "JOIN b.user u " +

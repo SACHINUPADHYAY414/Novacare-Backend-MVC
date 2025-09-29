@@ -38,15 +38,17 @@ public class DutyRosterController {
             List<DutyRoster> dutyRosters = dutyRosterService.getAllRoster();
 
             List<DutyRosterResponseDto> dtoList = dutyRosters.stream()
-                .map(duty -> new DutyRosterResponseDto(
-                    duty.getId(),
-                    LocalDate.parse(duty.getDutyDate()),
-                    duty.getFromTime(),
-                    duty.getToTime(),
-                    duty.getDuration(),
-                    duty.getIsAvailable(),
-                    duty.getDoctor() != null ? duty.getDoctor().getId() : null
-                ))
+            		.map(duty -> new DutyRosterResponseDto(
+            			    duty.getId(),
+            			    LocalDate.parse(duty.getDutyDate()),
+            			    duty.getFromTime(),
+            			    duty.getToTime(),
+            			    duty.getDuration(),
+            			    duty.getIsAvailable(),
+            			    duty.getDoctor() != null ? duty.getDoctor().getId() : null,
+            			    duty.getStatus(),
+            			    duty.getAmount()
+            			))
                 .toList();
 
             return ResponseEntity.ok(dtoList);

@@ -55,6 +55,7 @@ public class DutyRosterService {
         dutyRoster.setDuration(dto.getDuration());
         dutyRoster.setIsAvailable(dto.getIsAvailable() != null ? dto.getIsAvailable() : true);
         dutyRoster.setStatus(dto.getStatus().name());
+        dutyRoster.setAmount(dto.getAmount());
 
         Doctor doctor = doctorRepository.findById(dto.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + dto.getDoctorId()));
@@ -80,7 +81,8 @@ public class DutyRosterService {
                 dutyRoster.getDuration(),
                 dutyRoster.getIsAvailable(),
                 dutyRoster.getDoctor().getId(),
-                dutyRoster.getStatus()
+                dutyRoster.getStatus(),
+                dutyRoster.getAmount()
         )).collect(Collectors.toList());
     }
 
@@ -94,7 +96,8 @@ public class DutyRosterService {
         existingRoster.setFromTime(dto.getFromTime());
         existingRoster.setToTime(dto.getToTime());
         existingRoster.setDuration(dto.getDuration());
-
+        existingRoster.setAmount(dto.getAmount());
+        
         if (dto.getIsAvailable() != null) {
             existingRoster.setIsAvailable(dto.getIsAvailable());
         } else {
@@ -174,7 +177,8 @@ public class DutyRosterService {
                 slot.setFromTime(r.getFromTime());
                 slot.setToTime(r.getToTime());
                 slot.setDuration(r.getDuration());
-
+                slot.setAmount(r.getAmount());
+                
                 var times = bookedMap.getOrDefault(r.getId(), List.of());
                 slot.setBookedAppointmentTimes(times);
                 slot.setStatus(times.isEmpty() ? "AVAILABLE" : "BOOKED");

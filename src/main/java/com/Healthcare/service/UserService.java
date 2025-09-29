@@ -49,6 +49,7 @@ public class UserService {
     public boolean isSkipOtp() {
         return skipOtp;
     }
+
     private String generateUhid() {
         Long maxNumber = userRepository.findMaxUhidNumber();
         if (maxNumber == null) maxNumber = 0L;
@@ -259,6 +260,7 @@ public class UserService {
             emailService.sendOtpEmail(user.getEmail(), user.getName(), otp);
 
             response.put("message", "OTP sent to your email for login verification");
+            response.put("email", user.getEmail()); 
         } else {
             // OTP skipping
             List<String> roles = new ArrayList<>();

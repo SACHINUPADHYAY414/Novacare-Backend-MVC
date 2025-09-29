@@ -1,6 +1,8 @@
 package com.healthcare.dto;
 
 import jakarta.validation.constraints.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -32,7 +34,11 @@ public class DutySlotDto {
     private List<String> bookedAppointmentTimes;
 
     private String status;
+    
+    @NotNull(message = "Amount is required")
+    private BigDecimal amount;
 
+    
     // ======= Getters and Setters =======
 
     public Long getDutyRosterId() {
@@ -89,6 +95,14 @@ public class DutySlotDto {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     // ======= Custom Validation =======

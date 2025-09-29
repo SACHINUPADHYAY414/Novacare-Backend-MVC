@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.math.BigDecimal;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -29,55 +30,12 @@ public class BookAppointmentDto {
     @NotNull(message = "Appointment time is required")
     private LocalTime appointmentTime;
 
+    @NotNull(message = "Payment amount is required")
+    private BigDecimal amount;
+
     private String status = "BOOKED";
 
-    // Getters and setters
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(Long doctorId) {
-        this.doctorId = doctorId;
-    }
-
-    public Long getDutyRosterId() {
-        return dutyRosterId;
-    }
-
-    public void setDutyRosterId(Long dutyRosterId) {
-        this.dutyRosterId = dutyRosterId;
-    }
-
-    public LocalDate getAppointmentDate() {
-        return appointmentDate;
-    }
-
-    public void setAppointmentDate(LocalDate appointmentDate) {
-        this.appointmentDate = appointmentDate;
-    }
-
-    public LocalTime getAppointmentTime() {
-        return appointmentTime;
-    }
-
-    public void setAppointmentTime(LocalTime appointmentTime) {
-        this.appointmentTime = appointmentTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    private String razorpayOrderId;
+    private String razorpayPaymentId;
+    private String razorpaySignature;
 }

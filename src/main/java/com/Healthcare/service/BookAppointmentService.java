@@ -18,9 +18,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.time.format.DateTimeFormatter;
 
 @Service
 public class BookAppointmentService {
@@ -40,9 +40,16 @@ public class BookAppointmentService {
     @Autowired
     private JavaMailSender mailSender;
 
+    /**
+     * Book an appointment with validation and optional email confirmation.
+     * @param dto Data transfer object containing booking info.
+     * @param skipEmail If true, email confirmation will be skipped.
+     * @return Booked appointment entity.
+     */
     @Transactional
     public BookAppointment bookAppointment(BookAppointmentDto dto, boolean skipEmail) {
-        // Check if the time slot is already booked
+
+        // Check if time slot is already booked for given duty roster, date and time
         Optional<BookAppointment> existing = appointmentRepository
                 .findByDutyRosterIdAndAppointmentDateAndAppointmentTime(
                         dto.getDutyRosterId(),
@@ -53,29 +60,43 @@ public class BookAppointmentService {
             throw new TimeSlotAlreadyBookedException("This time slot is already booked.");
         }
 
-        Doctor doctor = doctorRepository.findById(dto.getDoctorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
-
-        DutyRoster dutyRoster = dutyRosterRepository.findById(dto.getDutyRosterId())
-                .orElseThrow(() -> new ResourceNotFoundException("Duty roster not found"));
-
+        // Fetch User
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        // Fetch Doctor
+        Doctor doctor = doctorRepository.findById(dto.getDoctorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+
+        // Fetch DutyRoster
+        DutyRoster dutyRoster = dutyRosterRepository.findById(dto.getDutyRosterId())
+                .orElseThrow(() -> new ResourceNotFoundException("Duty roster not found"));
+
+        // Create new appointment entity
         BookAppointment appointment = new BookAppointment();
-        appointment.setUserId(user.getId());
+        appointment.setUser(user);
         appointment.setDoctor(doctor);
         appointment.setDutyRoster(dutyRoster);
-        appointment.setStatus(dto.getStatus() != null ? dto.getStatus() : "BOOKED");
         appointment.setAppointmentDate(dto.getAppointmentDate());
         appointment.setAppointmentTime(dto.getAppointmentTime());
 
+        // Set status, default to "BOOKED" if not provided
+        appointment.setStatus(dto.getStatus() != null ? dto.getStatus() : "BOOKED");
+
+        // Set payment details if present
+        appointment.setAmount(dto.getAmount());
+        appointment.setRazorpayOrderId(dto.getRazorpayOrderId());
+        appointment.setRazorpayPaymentId(dto.getRazorpayPaymentId());
+        appointment.setRazorpaySignature(dto.getRazorpaySignature());
+
+        // Save appointment to DB
         appointmentRepository.save(appointment);
 
+        // Mark duty roster as unavailable
         dutyRoster.setIsAvailable(false);
         dutyRosterRepository.save(dutyRoster);
 
-        // Email sending controlled by skipEmail flag
+        // Send email confirmation if skipEmail=false
         if (!skipEmail) {
             sendConfirmationEmail(user, doctor, appointment);
         } else {
@@ -85,9 +106,12 @@ public class BookAppointmentService {
         return appointment;
     }
 
+    /**
+     * Helper method to send confirmation email for booked appointment.
+     */
     private void sendConfirmationEmail(User user, Doctor doctor, BookAppointment appointment) {
         if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            return; // ignore if no email
+            return; // No email to send
         }
 
         String subject = "Novacare: Appointment Confirmation";
@@ -101,7 +125,7 @@ public class BookAppointmentService {
 
         String body = "Dear " + name + ",\n\n"
                 + "We're pleased to confirm your appointment at Novacare.\n\n"
-                + "Here are the appointment details:\n\n"
+                + "Here are the appointment details:\n"
                 + "👨‍⚕️ Doctor: Dr. " + doctor.getName() + "\n"
                 + "📅 Date: " + formattedDate + "\n"
                 + "⏰ Time: " + appointment.getAppointmentTime() + "\n"
@@ -120,11 +144,17 @@ public class BookAppointmentService {
         mailSender.send(message);
     }
 
-    public List<AppointmentDetailsDto> getAppointmentsByUserId(Long userId) {
-        return appointmentRepository.findAppointmentsByUserId(userId);
-    }
-
+    /**
+     * Get all appointments with detailed user and doctor info.
+     */
     public List<AppointmentDetailsDto> getAllAppointments() {
         return appointmentRepository.findAllAppointmentsWithUserAndDoctor();
+    }
+
+    /**
+     * Get all appointments for a specific user.
+     */
+    public List<AppointmentDetailsDto> getAppointmentsByUserId(Long userId) {
+        return appointmentRepository.findAppointmentsByUserId(userId);
     }
 }

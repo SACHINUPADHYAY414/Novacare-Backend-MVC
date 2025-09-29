@@ -1,5 +1,6 @@
 package com.healthcare.model;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 
 import jakarta.persistence.Entity;
@@ -32,6 +33,8 @@ public class DutyRoster {
     private Doctor doctor;
 
     private String status;
+
+    private BigDecimal amount;
 
     // Getters and Setters
 
@@ -93,5 +96,13 @@ public class DutyRoster {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 }

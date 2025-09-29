@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -23,6 +24,10 @@ public class DoctorDutyScheduleDto {
     @Valid
     private List<DutySlotDto> duration;
 
+
+    @NotNull(message = "Payment amount is required")
+    private BigDecimal amount;
+    
 
     public Long getDoctorId() {
         return doctorId;
